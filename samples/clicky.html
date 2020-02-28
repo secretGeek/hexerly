@@ -1,0 +1,48 @@
+<html>
+    <head>
+        <!--[if IE]>
+            <script src="excanvas.compiled.js">
+            </script>
+        <![endif]-->
+        <style>
+            #a{border:1px dotted #888;float:left;} .info {border:1px solid #FFF;padding:10px;clear:right}
+            input{height:50px;padding-right:50px;}
+        </style>
+        <script src="..\lib\hexerly.js">
+        </script>
+		<script>
+		var NUM_COLUMNS, NUM_ROWS, h;
+		NUM_COLUMNS = 100;
+		NUM_ROWS = 100;
+        
+		function init() {
+		    var c, column, row, xAndY;
+            c = document.getElementById("a").getContext("2d");
+            for (column = 0; column < NUM_COLUMNS; column = column + 1) {
+                for (row = 0; row < NUM_ROWS; row = row + 1) {
+		     		xAndY = columnRowToXY(column, row); ///xAndY[0] is the x-coord, xAndY[1] is the y-coord. See... it contains x *and* y.
+                    drawHex(c, xAndY[0], xAndY[1], "#CCC","#FFF");
+		        }
+		    }
+			canvas = document.getElementById("a");
+		    canvas.addEventListener("click", function (e) {
+			    var columnAndRow = xyToColumnRow(e.clientX - canvas.offsetLeft + document.body.scrollLeft + document.documentElement.scrollLeft, 
+						e.clientY - canvas.offsetTop + document.body.scrollTop + document.documentElement.scrollTop);
+			    /// columnAndRow[0] is the column number, columnAndRow[1] is the row number. See... it contains column *and* row.
+                clickHex(canvas.getContext("2d"), columnAndRow);
+			}, false);
+		}
+		
+		function clickHex(c, columnAndRow) {
+		    var xAndY;
+		    xAndY = columnRowToXY(columnAndRow[0], columnAndRow[1]);
+			drawHex(c, xAndY[0]+0.5, xAndY[1]+0.5, "#772","#882"); //shadow
+            drawHex(c, xAndY[0]-0.5, xAndY[1]-0.5, "#DD4","#FF4"); //bright
+		}
+    	</script>
+    </head>
+    <body onload='init()'>
+        <canvas id="a" width="2000" height="1000">
+        </canvas>
+    </body>
+</html>

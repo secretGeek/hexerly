@@ -1,0 +1,21 @@
+Puzzler:
+detect win
+
+GOL:
+???
+
+Slay:
+if holding nothing and click on a kingdom that's not our own...
+then give the stats of that kingdom.
+
+placement of the village within the kingdom is not working (upon merges and captures)
+
+No 'drop' button. (If no undo, at least need a drop)
+
+Doesn't detect when the game is over. 
+
+Some edges of the island are not melted at all
+
+Melt doesn't remove edges from kingdoms.
+
+Villages not lit at the start
