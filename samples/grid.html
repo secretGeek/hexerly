@@ -1,6 +1,6 @@
 <html lang="en">
   <head>
-    <title>Click and Toggle example - Hexerly</title>
+    <title>Grid Click example - Hexerly</title>
     <meta
       charset="utf-8"
       name="viewport"
@@ -30,36 +30,14 @@
       NUM_COLUMNS = 100;
       NUM_ROWS = 100;
 
-      function Hex(column, row) {
-        this.column = column;
-        this.row = row;
-        this.fillColor = "#CCC";
-        this.draw = function (c) {
-          var xAndY;
-          xAndY = columnRowToXY(column, row); ///xAndY[0] is the x-coord, xAndY[1] is the y-coord. See... it contains x *and* y.
-          drawHex(c, xAndY[0], xAndY[1], this.fillColor, "#FFF");
-        };
-
-        this.click = function (c) {
-          if (this.fillColor === "#CCC") {
-            this.fillColor = "#F22";
-          } else {
-            this.fillColor = "#CCC";
-          }
-          this.draw(c);
-        };
-      }
-
       function init() {
+        setScale(1.06);
         var c, column, row, xAndY;
         c = document.getElementById("a").getContext("2d");
-        hexes = [];
-
         for (column = 0; column < NUM_COLUMNS; column = column + 1) {
-          hexes[column] = [];
           for (row = 0; row < NUM_ROWS; row = row + 1) {
-            hexes[column][row] = new Hex(column, row);
-            hexes[column][row].draw(c);
+            xAndY = columnRowToXY(column, row); ///xAndY[0] is the x-coord, xAndY[1] is the y-coord. See... it contains x *and* y.
+            drawHex(c, xAndY[0], xAndY[1], "#FFF", "#CCC");
           }
         }
         canvas = document.getElementById("a");
@@ -76,15 +54,22 @@
                 document.body.scrollTop +
                 document.documentElement.scrollTop
             );
-            /// columnAndRow[0] is the column number, columnAndRow[1] is the row number. See... it contains row *and* column.
-            hexes[columnAndRow[0]][columnAndRow[1]].click(c);
+            /// columnAndRow[0] is the column number, columnAndRow[1] is the row number. See... it contains column *and* row.
+            clickHex(canvas.getContext("2d"), columnAndRow);
           },
           false
         );
       }
+
+      function clickHex(c, columnAndRow) {
+        var xAndY;
+        xAndY = columnRowToXY(columnAndRow[0], columnAndRow[1]);
+        drawHex(c, xAndY[0] + 0.5, xAndY[1] + 0.5, "#772", "#882"); //shadow
+        drawHex(c, xAndY[0] - 0.5, xAndY[1] - 0.5, "#DD4", "#FF4"); //bright
+      }
     </script>
   </head>
   <body onload="init()">
-    <canvas id="a" width="2000" height="1000"> </canvas>
+    <canvas id="a" width="90" height="306"> </canvas>
   </body>
 </html>

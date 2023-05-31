@@ -1,5 +1,7 @@
-<html>
+<html lang="en">
+  <title>Hexerly documentation and samples</title>
     <head>
+      <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1.0">
         <!--[if IE]>
             <script src="excanvas.compiled.js">
             </script>
@@ -7,19 +9,30 @@
         <style>
             #a{border:1px dotted #888;float:left;} .info {border:1px solid #FFF;padding:10px;clear:right}
             input{height:50px;padding-right:50px;}
-			img{border-right:2px solid #444; border-bottom:2px solid #444; margin:5px;}
+      img{border-right:2px solid #444; border-bottom:2px solid #444; margin:5px;}
+      body {
+          max-width:70ch;
+          padding:2ch;
+          margin:auto;
+          font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+          font-size:1.2em;
+          box-shadow:0 0 20px rgba(0,0,0,0.4);
+        }
+        pre {
+          white-space:pre-wrap;
+        }
         </style>
         <script src="..\lib\hexerly.js">
         </script>
 
     </head>
     <body>
-	
-	<h1>Hexerly</h1>
-	
-	<p>Hexerly is a tiny set of helper functions for writing hexagonal games targeting the HTML5 Canvas element. The download includes a set of sample games.</p>
-	
-	<h2>Functions</h2>
+
+  <h1>Hexerly</h1>
+
+  <p>Hexerly is a tiny set of helper functions for writing hexagonal games targeting the HTML5 Canvas element. The download includes a set of sample games.</p>
+
+  <h2>Functions</h2>
 <p>There are just 5 functions in Hexerly, and they're all you need for rendering and using a hex-tiled surface.</p>
 
 <blockquote><code>drawHex(c, x, y, fillStyle, borderColor)<br />
@@ -84,41 +97,41 @@
 
 <h1>DOWNLOADS</h1>
 
-		<ul>
-		  <li><a href='..\lib\hexerly.js'>Get hexerly.js  (4191 bytes)</a></li>
-		  <li><a href='..\lib\hexerly.min.js'>Get minified version (2165 bytes)</a></li>
-		</ul>
+    <ul>
+      <li><a href='..\lib\hexerly.js'>Get hexerly.js  (4191 bytes)</a></li>
+      <li><a href='..\lib\hexerly.min.js'>Get minified version (2165 bytes)</a></li>
+    </ul>
 
-		
+
 <h1>Examples</h1>
-		<ul>
-		  <li><img src='images/clicky.png' /><a href='clicky.html'>clicky</a><p>Click a hex to turn it yellow.</p></li>
-		  <li><img src='images/simplest.png' /><a href='clicky2.html'>clicky 2</a><p>Click a hex to turn it red. Click again to turn it off.</p></li>
-  	      <li><img src='images/puzzler.png' /><a href='puzzler.html'>hexPuzzler</a><p>A fun hex puzzle. Arrange the pieces so that each piece's number of neighbors equals the number written on it.</p></li>
-		  <li><img src='images/evolve.png' /><a href='evolve.html'>evolve</a><p>Hexagonal cellular automata: trees, fire and water compete with wolves and rabbits. (Tip: try running it for a while, then starting a fire in a forest)</p></li>
-   	      <li><img src='images/hexgol.png' /><a href='hexgol.html'>hexGol</a><p>A hexagonal game of life-style cellular automata.</p></li>
-			<p>see also Martin Gardner, "The Fantastic Combinations of John Conway's New Solitaire Game 'Life,'" Scientific American, 223 (October 1970) 120–123.</p>
-		  <li><img src='images/slay.png' /><a href='slay.html'>slay</a><p>Dodgy recreation of <a href='http://www.windowsgames.co.uk/index.html'>Sean O'Connors excellent <a href='http://www.windowsgames.co.uk/slay.html'>slay game</a> (i'm addicted to <a href='http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewSoftware?id=305324342&mt=8'>the iphone version</a>). </p></li>
-		</ul>
-		
-		
-<h3>What is the '2D context' of a canvas element? In other words, what is 'c'?</h3>
-<p>The 'drawHex' and 'drawHexBorder' functions require a parameter named 'c' which is the 2D context of a canvas element.</p>
+
+  <ul>
+    <li><img src='images/clicky.png' alt="clicky screenshot: a plain hexagonal grid with a yellow tile" /><a href='clicky.html'>clicky</a><p>Click a hex to turn it yellow.</p></li>
+    <li><img src='images/simplest.png'  alt="clicky 2 screenshot: a plain hexagonal grid with a red tile" /><a href='clicky2.html'>clicky 2</a><p>Click a hex to turn it red. Click again to turn it off.</p></li>
+    <li><img src='images/puzzler.png'  alt="puzzler screenshot: a hexagonal grid with some red tiles that say '1' and some yellow tiles that say '2'" /><a href='puzzler.html'>hexPuzzler</a><p>A fun hex puzzle. Arrange the pieces so that each piece's number of neighbors equals the number written on it.</p></li>
+    <li><img src='images/evolve.png'  alt="screenshot of 'evolve' showing hexagonal tiles that are red, dark green, light green, blue, gray or white"/><a href='evolve.html'>evolve</a><p>Hexagonal cellular automata: trees, fire and water compete with wolves and rabbits. (Tip: try running it for a while, then starting a fire in a forest)</p></li>
+    <li><img src='images/hexgol.png' alt="screenshot of a hex game of life that is a complex multi-coloured set of hex agonal tiles in a circular pattern." /><a href='hexgol.html'>hexGol</a><p>A hexagonal game of life-style cellular automata.</p><p>see also Martin Gardner, "The Fantastic Combinations of John Conway's New Solitaire Game 'Life,'" Scientific American, 223 (October 1970) 120&mdash;123.</p></li>
+    <li><img src='images/slay.png' alt="screenshot of slay clone, showing green fields with a warrior and a peasant tile" /><a href='slay.html'>slay</a><p>Dodgy recreation of <a href='http://www.windowsgames.co.uk/index.html'>Sean O'Connors excellent <a href='http://www.windowsgames.co.uk/slay.html'>slay game</a> (i'm addicted to <a href='http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewSoftware?id=305324342&mt=8'>the iphone version</a>). </p></li>
+  </ul>
+
+
+<h3>What is the '2D context' of a canvas element? In other words, what is '<code>c</code>'?</h3>
+<p>The '<code>drawHex</code>' and '<code>drawHexBorder</code>' functions require a parameter named '<code>c</code>' which is the 2D context of a canvas element.</p>
 <p>I'll demonstrate what that means.</p>
-<p>Say we have a canvas element named 'myCanvasElement', like so:</p>
+<p>Say we have a canvas element named '<code>myCanvasElement</code>', like so:</p>
 
 <blockquote><code>&lt;canvas id='myCanvasElement' width='800' height='600'&gt; &lt;/canvas&gt;</code></blockquote>
 
 
-<p>To use any of the html5 canvas functions we need to retrieve the '2D context' from this element, like so:</p>
+<p>To use any of the html5 canvas functions we need to retrieve the '<code>2D context</code>' from this element, like so:</p>
 
 
 <blockquote><code>var c = document.getElementById("myCanvasElement").getContext("2d");</code></blockquote>
 
 
-<p>All drawing is performed against the resulting 2D context variable, c.</p>
+<p>All drawing is performed against the resulting 2D context variable, <code>c</code>.</p>
 
 
-		
+
     </body>
 </html>

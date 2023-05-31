@@ -1,90 +1,118 @@
-<html>
-    <head>
-        <!--[if IE]>
-            <script src="excanvas.compiled.js">
-            </script>
-        <![endif]-->
-        <style>
-            #a{border:1px dotted #888;float:left}
-			.info {border:1px solid #FFF;padding:10px;clear:right}
-			input{height:50px;padding-right:50px}
-			.prime{height:50px;padding-right:50px}
-        </style>
-        <script src="..\lib\hexerly.js">
-        </script>
-		<script>
-		var NUM_COLUMNS, NUM_ROWS, h, holding;
-		NUM_COLUMNS = 50;
-		NUM_ROWS = 50;
-		holding = null;
-		colors = ['#F00','#FF0','#F0F','#0F0','#0FF','#00F','#F00','#FF0','#F0F','#0F0','#0FF','#00F']
-        function Hex(column, row, count) {
-            this.column = column;
-            this.row = row;
-			this.fillColor = "#CCC";
-			this.count = count;
-	        this.draw = function(c) {
-	            var xAndY;
-  		        xAndY = columnRowToXY(column, row); ///xAndY[0] is the x-coord, xAndY[1] is the y-coord. See... it contains x *and* y.
-				
-				if (this.count != undefined) {
-					drawHex(c, xAndY[0], xAndY[1], colors[this.count-1],"#222");
-				    c.fillStyle = "#000";
-				    c.font = "bold 12px sans-serif";
-				    c.fillText(this.count, xAndY[0] + 10, xAndY[1] + 14.0);					
-					
-				} else {
-				  drawHex(c, xAndY[0], xAndY[1], "#000","#444");
-				}
-				
-            };
-			this.next = function() {
-			    var neighbors, outerNeighbors, newCount;
-			    neighbors = getNeighbors(column, row);
-				outerNeighbors = getOuterNeighbors(column, row);
-				newCount = 0;
-				finalCount = 0;
-				for (j = 0; j < neighbors.length; j = j + 1) {
-				    if (neighbors[j] != null && neighbors[j].count > 0) { 
-					  newCount = newCount + 1;
-					}
-					
-				}
-				for (j = 0; j < outerNeighbors.length; j = j + 1) {
-				    if (outerNeighbors[j] != null && outerNeighbors[j].count > 0) {
-					  newCount = newCount + (3 * outerNeighbors[j].count);
-					}
-				}
+<html lang="en">
+  <head>
+    <title>Hexagonal cellular automata example - Hexerly</title>
+    <meta
+      charset="utf-8"
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <!--[if IE]>
+      <script src="excanvas.compiled.js"></script>
+    <![endif]-->
+    <style>
+      #a {
+        border: 1px dotted #888;
+        float: left;
+      }
+      .info {
+        border: 1px solid #fff;
+        padding: 10px;
+        clear: right;
+      }
+      input {
+        height: 50px;
+        padding-right: 50px;
+      }
+      .prime {
+        height: 50px;
+        padding-right: 50px;
+      }
+    </style>
+    <script src="..\lib\hexerly.js"></script>
+    <script>
+      var NUM_COLUMNS, NUM_ROWS, h, holding;
+      NUM_COLUMNS = 50;
+      NUM_ROWS = 50;
+      holding = null;
+      colors = [
+        "#F00",
+        "#FF0",
+        "#F0F",
+        "#0F0",
+        "#0FF",
+        "#00F",
+        "#F00",
+        "#FF0",
+        "#F0F",
+        "#0F0",
+        "#0FF",
+        "#00F",
+      ];
+      function Hex(column, row, count) {
+        this.column = column;
+        this.row = row;
+        this.fillColor = "#CCC";
+        this.count = count;
+        this.draw = function (c) {
+          var xAndY;
+          xAndY = columnRowToXY(column, row); ///xAndY[0] is the x-coord, xAndY[1] is the y-coord. See... it contains x *and* y.
 
-				finalCount = 0;
-				
-				//Here's the current function...
-				finalCount = Math.round(newCount / 7);
-				if (finalCount > 4) { finalCount = 0; }
-				//..
-				
-				//previously I went with:
-				//if (newCount > 3 && newCount < 8) {
-				//  finalCount = 1;
-				//} else if (newCount > 7 && newCount < 11) {
-				//  finalCount = 2;
-				//}
-				
-			    return new Hex(column, row, finalCount);
-			}
-			
-			this.click = function(c) {
-			    if (this.count == undefined || this.count > 0) {
-					this.count = 0;
-					this.draw(c);
-					return;
-				}
-				
-				
-				this.count = 1;
-				this.draw(c);
-				return; 
-				/*
+          if (this.count != undefined) {
+            drawHex(c, xAndY[0], xAndY[1], colors[this.count - 1], "#222");
+            c.fillStyle = "#000";
+            c.font = "bold 12px sans-serif";
+            c.fillText(this.count, xAndY[0] + 10, xAndY[1] + 14.0);
+          } else {
+            drawHex(c, xAndY[0], xAndY[1], "#000", "#444");
+          }
+        };
+        this.next = function () {
+          var neighbors, outerNeighbors, newCount;
+          neighbors = getNeighbors(column, row);
+          outerNeighbors = getOuterNeighbors(column, row);
+          newCount = 0;
+          finalCount = 0;
+          for (j = 0; j < neighbors.length; j = j + 1) {
+            if (neighbors[j] != null && neighbors[j].count > 0) {
+              newCount = newCount + 1;
+            }
+          }
+          for (j = 0; j < outerNeighbors.length; j = j + 1) {
+            if (outerNeighbors[j] != null && outerNeighbors[j].count > 0) {
+              newCount = newCount + 3 * outerNeighbors[j].count;
+            }
+          }
+
+          finalCount = 0;
+
+          //Here's the current function...
+          finalCount = Math.round(newCount / 7);
+          if (finalCount > 4) {
+            finalCount = 0;
+          }
+          //..
+
+          //previously I went with:
+          //if (newCount > 3 && newCount < 8) {
+          //  finalCount = 1;
+          //} else if (newCount > 7 && newCount < 11) {
+          //  finalCount = 2;
+          //}
+
+          return new Hex(column, row, finalCount);
+        };
+
+        this.click = function (c) {
+          if (this.count == undefined || this.count > 0) {
+            this.count = 0;
+            this.draw(c);
+            return;
+          }
+
+          this.count = 1;
+          this.draw(c);
+          return;
+          /*
 				var outerNeighbors, j;
 				outerNeighbors = getOuterNeighbors(this.column, this.row);
 				for (j = 0; j < outerNeighbors.length; j = j + 1) {
@@ -92,8 +120,8 @@
 					outerNeighbors[j].draw(c);
 				}
 				*/
-				
-				/*
+
+          /*
 			    if (holding == null && this.count == undefined) {
 				  //Nothing happened.
 				  return;
@@ -133,126 +161,135 @@
 				  return;
 				}
 				*/
-			}
+        };
+      }
+
+      function getNeighbors(column, row) {
+        if (row == undefined) {
+          //this is a mistake i make too often -- thinking i can pass a point to this function
+          alert("getNeighbors requires a column and a row");
         }
-        
-		function getNeighbors(column, row) {
-		    if (row == undefined) {
-		        //this is a mistake i make too often -- thinking i can pass a point to this function
-		        alert('getNeighbors requires a column and a row');
-    		}
-		    var shift, neighbors;
-    		shift = column % 2; //funky hex layout magic
-    		neighbors = [];
-    		neighbors[0] = getHex(column, row - 1);
-    		neighbors[1] = getHex(column + 1, row - 1 + shift);
-    		neighbors[2] = getHex(column + 1, row + shift);
-		    neighbors[3] = getHex(column, row + 1);
-    		neighbors[4] = getHex(column - 1, row + shift);
-    		neighbors[5] = getHex(column - 1, row - 1 + shift);
-    		return neighbors;
-		}
+        var shift, neighbors;
+        shift = column % 2; //funky hex layout magic
+        neighbors = [];
+        neighbors[0] = getHex(column, row - 1);
+        neighbors[1] = getHex(column + 1, row - 1 + shift);
+        neighbors[2] = getHex(column + 1, row + shift);
+        neighbors[3] = getHex(column, row + 1);
+        neighbors[4] = getHex(column - 1, row + shift);
+        neighbors[5] = getHex(column - 1, row - 1 + shift);
+        return neighbors;
+      }
 
-		function getOuterNeighbors(column, row) {
-		    if (row == undefined) {
-		        //this is a mistake i make too often -- thinking i can pass a point to this function
-		        alert('getNeighbors requires a column and a row');
-    		}
-		    var shift, neighbors;
-    		shift = column % 2; //funky hex layout magic
-    		neighbors = [];
-    		neighbors[0] = getHex(column + 1, row - 2 + shift);
-			neighbors[1] = getHex(column + 2, row);
-    		neighbors[2] = getHex(column + 1, row + 1 + shift);
-			neighbors[3] = getHex(column - 1, row - 2 + shift);
-			neighbors[4] = getHex(column - 2, row);
-    		neighbors[5] = getHex(column - 1, row + 1 + shift);
-			return neighbors;
-		}
-		
-		function getHex(column, row) {
-    		if (column >= 0 && row >= 0 && hexes[column] != undefined) {
-				return hexes[column][row];
-    		}
-    		return null;
-		}
+      function getOuterNeighbors(column, row) {
+        if (row == undefined) {
+          //this is a mistake i make too often -- thinking i can pass a point to this function
+          alert("getNeighbors requires a column and a row");
+        }
+        var shift, neighbors;
+        shift = column % 2; //funky hex layout magic
+        neighbors = [];
+        neighbors[0] = getHex(column + 1, row - 2 + shift);
+        neighbors[1] = getHex(column + 2, row);
+        neighbors[2] = getHex(column + 1, row + 1 + shift);
+        neighbors[3] = getHex(column - 1, row - 2 + shift);
+        neighbors[4] = getHex(column - 2, row);
+        neighbors[5] = getHex(column - 1, row + 1 + shift);
+        return neighbors;
+      }
 
+      function getHex(column, row) {
+        if (column >= 0 && row >= 0 && hexes[column] != undefined) {
+          return hexes[column][row];
+        }
+        return null;
+      }
 
-		function reset() {
-			var c = document.getElementById("a").getContext("2d");
-			hexes = newBoard(c);
-		}
-		
-		function next() {
-			var newHexes = [];
-		    for (column = 0; column < NUM_COLUMNS; column = column + 1) {
-			    newHexes[column] = [];
-                for (row = 0; row < NUM_ROWS; row = row + 1) {				
-				    newHexes[column][row] = hexes[column][row].next();
-		        }
-		    }
-		    
-			var c = document.getElementById("a").getContext("2d");
-            for (column = 0; column < NUM_COLUMNS; column = column + 1) {
-			    hexes[column] = [];
-                for (row = 0; row < NUM_ROWS; row = row + 1) {
-				    hexes[column][row] = newHexes[column][row];
-					hexes[column][row].draw(c);
-		        }
-		    }
-            if (document.getElementById('auto').checked) {
-				setTimeout(next, 200);
-			}
-		}
+      function reset() {
+        var c = document.getElementById("a").getContext("2d");
+        hexes = newBoard(c);
+      }
 
-    function newBoard(c) {		
-		var newHexes = [];
-		for (column = 0; column < NUM_COLUMNS; column = column + 1) {
-		    newHexes[column] = [];
-            for (row = 0; row < NUM_ROWS; row = row + 1) {
-			    newHexes[column][row] = new Hex(column, row, 0);
-				newHexes[column][row].draw(c);
-		    }
-	    }
-	    return newHexes;
-    }
-		
-	function init() {
-		    var c, column, row, xAndY;
-            c = document.getElementById("a").getContext("2d");
-			hexes = newBoard(c);
-				
-			addHex(c, 24, 17, 1);
-			//addHex(c, 11, 5, 2);
-			//addHex(c, 12, 2, 2);
-			//addHex(c, 13, 4, 1);
-			//addHex(c, 14, 6, 1);
-			//addHex(c, 12, 8, 1);
-			
-			
-			//TODO: detect when someone wins.
-			
-			canvas = document.getElementById("a");
-		    canvas.addEventListener("click", function (e) {
-			    var columnAndRow = xyToColumnRow(e.clientX - canvas.offsetLeft + document.body.scrollLeft + document.documentElement.scrollLeft, 
-						e.clientY - canvas.offsetTop + document.body.scrollTop + document.documentElement.scrollTop);
-			    /// columnAndRow[0] is the column number, columnAndRow[1] is the row number. See... it contains row *and* column.
-				hexes[columnAndRow[0]][columnAndRow[1]].click(c);
-			}, false);
-		}
-		
-		function addHex(c,row,column, count) {
-			hexes[row][column] = new Hex(row, column, count);
-			hexes[row][column].draw(c);
-		}
-		
-    	</script>
-    </head>
-    <body onload='init()'>
-        <canvas id="a" width="1020" height="800">
-        </canvas>
-		<input type='button' value='Time++' onclick='next();' class='prime' />
-		<label for='auto'><input type='checkbox' value='auto' id='auto' />Run</label><br />
-		<input type='button' value='Reset' onclick='reset();'  />
-    </body>
+      function next() {
+        var newHexes = [];
+        for (column = 0; column < NUM_COLUMNS; column = column + 1) {
+          newHexes[column] = [];
+          for (row = 0; row < NUM_ROWS; row = row + 1) {
+            newHexes[column][row] = hexes[column][row].next();
+          }
+        }
+
+        var c = document.getElementById("a").getContext("2d");
+        for (column = 0; column < NUM_COLUMNS; column = column + 1) {
+          hexes[column] = [];
+          for (row = 0; row < NUM_ROWS; row = row + 1) {
+            hexes[column][row] = newHexes[column][row];
+            hexes[column][row].draw(c);
+          }
+        }
+        if (document.getElementById("auto").checked) {
+          setTimeout(next, 200);
+        }
+      }
+
+      function newBoard(c) {
+        var newHexes = [];
+        for (column = 0; column < NUM_COLUMNS; column = column + 1) {
+          newHexes[column] = [];
+          for (row = 0; row < NUM_ROWS; row = row + 1) {
+            newHexes[column][row] = new Hex(column, row, 0);
+            newHexes[column][row].draw(c);
+          }
+        }
+        return newHexes;
+      }
+
+      function init() {
+        var c, column, row, xAndY;
+        c = document.getElementById("a").getContext("2d");
+        hexes = newBoard(c);
+
+        addHex(c, 24, 17, 1);
+        //addHex(c, 11, 5, 2);
+        //addHex(c, 12, 2, 2);
+        //addHex(c, 13, 4, 1);
+        //addHex(c, 14, 6, 1);
+        //addHex(c, 12, 8, 1);
+
+        //TODO: detect when someone wins.
+
+        canvas = document.getElementById("a");
+        canvas.addEventListener(
+          "click",
+          function (e) {
+            var columnAndRow = xyToColumnRow(
+              e.clientX -
+                canvas.offsetLeft +
+                document.body.scrollLeft +
+                document.documentElement.scrollLeft,
+              e.clientY -
+                canvas.offsetTop +
+                document.body.scrollTop +
+                document.documentElement.scrollTop
+            );
+            /// columnAndRow[0] is the column number, columnAndRow[1] is the row number. See... it contains row *and* column.
+            hexes[columnAndRow[0]][columnAndRow[1]].click(c);
+          },
+          false
+        );
+      }
+
+      function addHex(c, row, column, count) {
+        hexes[row][column] = new Hex(row, column, count);
+        hexes[row][column].draw(c);
+      }
+    </script>
+  </head>
+  <body onload="init()">
+    <canvas id="a" width="1020" height="800"> </canvas>
+    <input type="button" value="Time++" onclick="next();" class="prime" />
+    <label for="auto"><input type="checkbox" value="auto" id="auto" />Run</label
+    ><br />
+    <input type="button" value="Reset" onclick="reset();" />
+  </body>
 </html>

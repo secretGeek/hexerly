@@ -1,9 +1,8 @@
 # hexerly
+
 Hexerly is a tiny set of helper functions for writing hexagonal games targeting the HTML5 Canvas element. The download includes a set of sample games.
 
 See [samples](/samples/index.html)
-
-
 
 ## Functions
 
@@ -87,7 +86,7 @@ Get minified version (2165 bytes)
 * clicky 2
   Click a hex to turn it red. Click again to turn it off.
 
-*  hexPuzzler
+* hexPuzzler
    A fun hex puzzle. Arrange the pieces so that each piece's number of neighbors equals the number written on it.
 
 * evolve
@@ -109,7 +108,7 @@ I'll demonstrate what that means.
 
 Say we have a canvas element named 'myCanvasElement', like so:
 
-  <canvas id='myCanvasElement' width='800' height='600'> </canvas>
+    <canvas id='myCanvasElement' width='800' height='600'> </canvas>
 
 To use any of the html5 canvas functions we need to retrieve the '2D context' from this element, like so:
 

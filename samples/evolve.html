@@ -1,328 +1,410 @@
-<html>
-    <head>
-        <!--[if IE]>
-            <script src="excanvas.compiled.js">
-            </script>
-        <![endif]-->
-        <style>
-            #a{border:1px dotted #888;float:left;} .info {border:1px solid #FFF;padding:10px;clear:right}
-            .prime{height:50px;padding-right:50px;}
-			label {padding-right:10px}
-			.Fire { background-color:#F22}
-			.Water { background-color:#048; color:#DDD}
-			.Grass { background-color:#0C2}
-			.Tree { background-color:#060; color:#DDD}
-			.Rabbit { background-color:#DDD}
-			.Wolf { background-color:#666; color:#DDD}
-			p {margin-left:2px; padding-left:10px;text-indent:5px}
-        </style>
-        <script src="..\lib\hexerly.js">
-        </script>
-		<script>
-		var NUM_COLUMNS, NUM_ROWS, h;
-		NUM_COLUMNS = 49;
-		NUM_ROWS = 25; 
+<html lang="en">
+  <head>
+    <title>Evolution example - Hexerly</title>
+    <meta
+      charset="utf-8"
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <!--[if IE]>
+      <script src="excanvas.compiled.js"></script>
+    <![endif]-->
+    <style>
+      #a {
+        border: 1px dotted #888;
+        float: left;
+      }
+      .info {
+        border: 1px solid #fff;
+        padding: 10px;
+        clear: right;
+      }
+      .prime {
+        height: 50px;
+        padding-right: 50px;
+      }
+      label {
+        padding-right: 10px;
+      }
+      .Fire {
+        background-color: #f22;
+      }
+      .Water {
+        background-color: #048;
+        color: #ddd;
+      }
+      .Grass {
+        background-color: #0c2;
+      }
+      .Tree {
+        background-color: #060;
+        color: #ddd;
+      }
+      .Rabbit {
+        background-color: #ddd;
+      }
+      .Wolf {
+        background-color: #666;
+        color: #ddd;
+      }
+      p {
+        margin-left: 2px;
+        padding-left: 10px;
+        text-indent: 5px;
+      }
+    </style>
+    <script src="..\lib\hexerly.js"></script>
+    <script>
+      var NUM_COLUMNS, NUM_ROWS, h;
+      NUM_COLUMNS = 49;
+      NUM_ROWS = 25;
 
-		function Tree() {
-		  this.color = "#060";
-     	    this.next = function(counts) {
-				if (counts['Fire'] != undefined && counts['Fire']>0) {				
-				  return new Fire();
-				}
-				
-				if (counts['Wolf'] != undefined && counts['Wolf']>5) {				
-				  return new Grass();
-				}
-				
-				if (counts['Rabbit'] != undefined && counts['Rabbit']>4) {				
-				  return new Grass();
-				}
-				
-				if (counts['Rabbit'] != undefined && counts['Rabbit']>2) {				
-				  return new Rabbit();
-				}
-				if (counts['Tree'] != undefined && counts['Tree']>5) {				
-				  return new Grass();
-				}
-				
-				return this;
-			};
+      function Tree() {
+        this.color = "#060";
+        this.next = function (counts) {
+          if (counts["Fire"] != undefined && counts["Fire"] > 0) {
+            return new Fire();
+          }
 
-		}
-		function Wolf() {
-            this.color = "#666";
-     	    this.next = function(counts) {
-								
-				if (counts['Wolf'] != undefined && counts['Wolf']>1) {				
-				  return new Grass();
-				}
-				
-				if (counts['Rabbit'] != undefined && counts['Rabbit']==6) {
-				  return new Grass();
-				}
-				
-				if (counts['Fire'] != undefined && counts['Fire']> 2) {
-				  return new Fire();
-				}
-				return this;
-			};
-		  
-		}
-		
-		function Grass() {
-		    this.color = "#0C2";
-     	    this.next = function(counts) {
-				
-				if (counts['Wolf'] != undefined && counts['Wolf']==2) {				
-				  return new Wolf();
-				}
-				
-				if (counts['Rabbit'] != undefined && counts['Rabbit']> 1) {
-				  return new Rabbit();
-				}
-				
-				if (counts['Fire'] != undefined && counts['Fire']> 4) {
-				  return new Fire();
-				}
-				
-				if (counts['Tree'] != undefined && counts['Tree']> 1) {
-				  return new Tree();
-				}
-				if (counts['Grass'] != undefined && counts['Grass']> 4
-				    && counts['Rabbit'] != undefined && counts['Rabbit']== 1) {
-				  return new Tree();
-				}
-				if (counts['Water'] != undefined) {
-					water = counts['Water'];
-					if (Math.floor((Math.random() * 50)) < water) {
-					  return new Water();
-                    }				    
-				}
+          if (counts["Wolf"] != undefined && counts["Wolf"] > 5) {
+            return new Grass();
+          }
 
-				return this;
-			};
-		}
-		
-		function Water() {
-     	    this.color = "#048";
-    	    this.next = function(counts) {
-				if (counts['Fire'] != undefined && counts['Fire']>1) {				
-				  return new Ash();
-				}
+          if (counts["Rabbit"] != undefined && counts["Rabbit"] > 4) {
+            return new Grass();
+          }
 
-				if (counts['Wolf'] != undefined && counts['Wolf']>2) {				
-				  return new Grass();
-				}
-				
-				
-				return this;
-		    }
-		}
-		function Rabbit() {
-     	    this.color = "#DDD";
-     	    this.next = function(counts) {
-				
-				if (counts['Wolf'] != undefined && counts['Wolf']>0) {				
-				  return new Grass();
-				}
-				
-				if (counts['Fire'] != undefined && counts['Fire']> 3) {
-				  return new Fire();
-				}
-				
-				if (counts['Water'] != undefined && counts['Water']> 5) {
-				  return new Grass();
-				}
-				
-				if (counts['Rabbit'] != undefined && counts['Rabbit']> 4) {
-				  return new Grass();
-				}
-				
-				return this;
-			};
-		}
-		function Fire() {
-    	  this.color = "#F22";
-     	    this.next = function(counts) {
-				
-				if (counts['Tree'] != undefined && counts['Tree']>3 &&
-				    counts['Fire'] != undefined && counts['Fire']< 2
-				) {				
-				  return this;
-				}
-				
-				if (counts['Fire'] != undefined && counts['Fire']> 3) {
-				  return new Ash();
-				}
-				
-				if (counts['Water'] != undefined && counts['Water']> 3) {
-				  return new Ash();
-				}
-				
-				return new Ash();
-			};
-		}
-		function Ash() {
-		    this.color = "#222";
-   	        this.next = function(counts) {
-		        return new Grass();
-		    }
-		}
-		
-        function Hex(column, row) {
-            this.column = column;
-            this.row = row;
-			this.fillColor = "#CCC";
-			this.holding = null;
-			
-	        this.draw = function(c) {
-			    if (this.holding != null) {
-				  this.fillColor = this.holding.color;
-				}
-	            var xAndY;
-  		        xAndY = columnRowToXY(column, row); ///xAndY[0] is the x-coord, xAndY[1] is the y-coord. See... it contains x *and* y.
-	            drawHex(c, xAndY[0], xAndY[1], this.fillColor, this.fillColor);//"#FFF");
-            };
-			
-			this.click = function(c) {
-				uses = document.getElementsByName('use'); 
-				for(i = 0; i  < uses.length; i = i + 1) {
-				  if (uses[i].checked) {
-				    //eval's reputation of being evil is over-rated.
-					//eval is my friend.
-				    eval("this.holding = new " + uses[i].value + "()");
-					this.draw(c);
-					return;
-				  }
-				}
-			}
-			
-			this.next = function() {
-			  var j, counts, neighbors, result =  new Hex(column, row);
-			  result.fillColor = "#0F8";
-			  result.holding = this.holding;
-			  
-			  if (result.holding != null && result.holding.next != null) {
-			    neighbors = getNeighbors(column, row);
-				
-				//work out next appearance based on current neighbors...
-			    counts = {};
-		        for (j = 0; j < neighbors.length; j = j + 1) {
-			        if (neighbors[j] != null && neighbors[j].holding != null) {
-					  if (counts[neighbors[j].holding.constructor.name] == undefined) {
-					    counts[neighbors[j].holding.constructor.name] = 1;
-					  } else {
-					    counts[neighbors[j].holding.constructor.name] ++;
-					  }
-					}
-			    }
-				result.holding = result.holding.next(counts);
-			  }
-			  return result;
-			}
+          if (counts["Rabbit"] != undefined && counts["Rabbit"] > 2) {
+            return new Rabbit();
+          }
+          if (counts["Tree"] != undefined && counts["Tree"] > 5) {
+            return new Grass();
+          }
+
+          return this;
+        };
+      }
+      function Wolf() {
+        this.color = "#666";
+        this.next = function (counts) {
+          if (counts["Wolf"] != undefined && counts["Wolf"] > 1) {
+            return new Grass();
+          }
+
+          if (counts["Rabbit"] != undefined && counts["Rabbit"] == 6) {
+            return new Grass();
+          }
+
+          if (counts["Fire"] != undefined && counts["Fire"] > 2) {
+            return new Fire();
+          }
+          return this;
+        };
+      }
+
+      function Grass() {
+        this.color = "#0C2";
+        this.next = function (counts) {
+          if (counts["Wolf"] != undefined && counts["Wolf"] == 2) {
+            return new Wolf();
+          }
+
+          if (counts["Rabbit"] != undefined && counts["Rabbit"] > 1) {
+            return new Rabbit();
+          }
+
+          if (counts["Fire"] != undefined && counts["Fire"] > 4) {
+            return new Fire();
+          }
+
+          if (counts["Tree"] != undefined && counts["Tree"] > 1) {
+            return new Tree();
+          }
+          if (
+            counts["Grass"] != undefined &&
+            counts["Grass"] > 4 &&
+            counts["Rabbit"] != undefined &&
+            counts["Rabbit"] == 1
+          ) {
+            return new Tree();
+          }
+          if (counts["Water"] != undefined) {
+            water = counts["Water"];
+            if (Math.floor(Math.random() * 50) < water) {
+              return new Water();
+            }
+          }
+
+          return this;
+        };
+      }
+
+      function Water() {
+        this.color = "#048";
+        this.next = function (counts) {
+          if (counts["Fire"] != undefined && counts["Fire"] > 1) {
+            return new Ash();
+          }
+
+          if (counts["Wolf"] != undefined && counts["Wolf"] > 2) {
+            return new Grass();
+          }
+
+          return this;
+        };
+      }
+      function Rabbit() {
+        this.color = "#DDD";
+        this.next = function (counts) {
+          if (counts["Wolf"] != undefined && counts["Wolf"] > 0) {
+            return new Grass();
+          }
+
+          if (counts["Fire"] != undefined && counts["Fire"] > 3) {
+            return new Fire();
+          }
+
+          if (counts["Water"] != undefined && counts["Water"] > 5) {
+            return new Grass();
+          }
+
+          if (counts["Rabbit"] != undefined && counts["Rabbit"] > 4) {
+            return new Grass();
+          }
+
+          return this;
+        };
+      }
+      function Fire() {
+        this.color = "#F22";
+        this.next = function (counts) {
+          if (
+            counts["Tree"] != undefined &&
+            counts["Tree"] > 3 &&
+            counts["Fire"] != undefined &&
+            counts["Fire"] < 2
+          ) {
+            return this;
+          }
+
+          if (counts["Fire"] != undefined && counts["Fire"] > 3) {
+            return new Ash();
+          }
+
+          if (counts["Water"] != undefined && counts["Water"] > 3) {
+            return new Ash();
+          }
+
+          return new Ash();
+        };
+      }
+      function Ash() {
+        this.color = "#222";
+        this.next = function (counts) {
+          return new Grass();
+        };
+      }
+
+      function Hex(column, row) {
+        this.column = column;
+        this.row = row;
+        this.fillColor = "#CCC";
+        this.holding = null;
+
+        this.draw = function (c) {
+          if (this.holding != null) {
+            this.fillColor = this.holding.color;
+          }
+          var xAndY;
+          xAndY = columnRowToXY(column, row); ///xAndY[0] is the x-coord, xAndY[1] is the y-coord. See... it contains x *and* y.
+          drawHex(c, xAndY[0], xAndY[1], this.fillColor, this.fillColor); //"#FFF");
+        };
+
+        this.click = function (c) {
+          uses = document.getElementsByName("use");
+          for (i = 0; i < uses.length; i = i + 1) {
+            if (uses[i].checked) {
+              //eval's reputation of being evil is over-rated.
+              //eval is my friend.
+              eval("this.holding = new " + uses[i].value + "()");
+              this.draw(c);
+              return;
+            }
+          }
+        };
+
+        this.next = function () {
+          var j,
+            counts,
+            neighbors,
+            result = new Hex(column, row);
+          result.fillColor = "#0F8";
+          result.holding = this.holding;
+
+          if (result.holding != null && result.holding.next != null) {
+            neighbors = getNeighbors(column, row);
+
+            //work out next appearance based on current neighbors...
+            counts = {};
+            for (j = 0; j < neighbors.length; j = j + 1) {
+              if (neighbors[j] != null && neighbors[j].holding != null) {
+                if (
+                  counts[neighbors[j].holding.constructor.name] == undefined
+                ) {
+                  counts[neighbors[j].holding.constructor.name] = 1;
+                } else {
+                  counts[neighbors[j].holding.constructor.name]++;
+                }
+              }
+            }
+            result.holding = result.holding.next(counts);
+          }
+          return result;
+        };
+      }
+
+      function init() {
+        var c, column, row, xAndY;
+        c = document.getElementById("a").getContext("2d");
+        hexes = [];
+
+        for (column = 0; column < NUM_COLUMNS; column = column + 1) {
+          hexes[column] = [];
+          for (row = 0; row < NUM_ROWS; row = row + 1) {
+            hexes[column][row] = new Hex(column, row);
+            randy = Math.floor(Math.random() * 15);
+            if (randy == 0) {
+              hexes[column][row].holding = new Wolf();
+            } else if (randy == 1) {
+              hexes[column][row].holding = new Tree();
+            } else if (randy == 2) {
+              hexes[column][row].holding = new Water();
+            } else if (randy == 3) {
+              hexes[column][row].holding = new Rabbit();
+            } else {
+              hexes[column][row].holding = new Grass();
+            }
+
+            hexes[column][row].draw(c);
+          }
         }
-        
-		function init() {
-		    var c, column, row, xAndY;
-            c = document.getElementById("a").getContext("2d");
-			hexes = [];
-    
-            for (column = 0; column < NUM_COLUMNS; column = column + 1) {
-			    hexes[column] = [];
-                for (row = 0; row < NUM_ROWS; row = row + 1) {
-				    hexes[column][row] = new Hex(column, row);
-					randy = Math.floor(Math.random() * 15);
-					if (randy == 0) {
-					  hexes[column][row].holding = new Wolf();
-					} else if (randy == 1) {
-					  hexes[column][row].holding = new Tree();
-					} else if (randy == 2) {
-					  hexes[column][row].holding = new Water();
-					} else if (randy == 3) {
-					  hexes[column][row].holding = new Rabbit();
-					} else  {
-					  hexes[column][row].holding = new Grass();
-					}
+        canvas = document.getElementById("a");
+        canvas.addEventListener(
+          "click",
+          function (e) {
+            var columnAndRow = xyToColumnRow(
+              e.clientX -
+                canvas.offsetLeft +
+                document.body.scrollLeft +
+                document.documentElement.scrollLeft,
+              e.clientY -
+                canvas.offsetTop +
+                document.body.scrollTop +
+                document.documentElement.scrollTop
+            );
+            /// columnAndRow[0] is the column number, columnAndRow[1] is the row number. See... it contains row *and* column.
+            hexes[columnAndRow[0]][columnAndRow[1]].click(c);
+          },
+          false
+        );
+      }
 
-					hexes[column][row].draw(c);
-		        }
-		    }
-			canvas = document.getElementById("a");
-		    canvas.addEventListener("click", function (e) {
-			    var columnAndRow = xyToColumnRow(e.clientX - canvas.offsetLeft + document.body.scrollLeft + document.documentElement.scrollLeft, 
-						e.clientY - canvas.offsetTop + document.body.scrollTop + document.documentElement.scrollTop);
-			    /// columnAndRow[0] is the column number, columnAndRow[1] is the row number. See... it contains row *and* column.
-				hexes[columnAndRow[0]][columnAndRow[1]].click(c);
-			}, false);
-		}
-		
-		function next() {
-			var newHexes = [];
-		    for (column = 0; column < NUM_COLUMNS; column = column + 1) {
-			    newHexes[column] = [];
-                for (row = 0; row < NUM_ROWS; row = row + 1) {				
-				    newHexes[column][row] = hexes[column][row].next();
-		        }
-		    }
-		    
-			var c = document.getElementById("a").getContext("2d");
-            for (column = 0; column < NUM_COLUMNS; column = column + 1) {
-			    hexes[column] = [];
-                for (row = 0; row < NUM_ROWS; row = row + 1) {
-				    hexes[column][row] = newHexes[column][row];
-					hexes[column][row].draw(c);
-		        }
-		    }
-            if (document.getElementById('auto').checked) {
-				setTimeout(next, 200);
-			}
-		}
-		
-		function getNeighbors(column, row) {
-		    if (row == undefined) {
-		        //this is a mistake i make too often -- thinking i can pass a point to this function
-		        alert('getNeighbors requires a column and a row');
-    		}
-		    var shift, neighbors;
-    		shift = column % 2; //funky hex layout magic
-    		neighbors = [];
-    		neighbors[0] = getHex(column, row - 1);
-    		neighbors[1] = getHex(column + 1, row - 1 + shift);
-    		neighbors[2] = getHex(column + 1, row + shift);
-		    neighbors[3] = getHex(column, row + 1);
-    		neighbors[4] = getHex(column - 1, row + shift);
-    		neighbors[5] = getHex(column - 1, row - 1 + shift);
-    		return neighbors;
-		}
+      function next() {
+        var newHexes = [];
+        for (column = 0; column < NUM_COLUMNS; column = column + 1) {
+          newHexes[column] = [];
+          for (row = 0; row < NUM_ROWS; row = row + 1) {
+            newHexes[column][row] = hexes[column][row].next();
+          }
+        }
 
-		function getHex(column, row) {
-    		if (column >= 0 && row >= 0 && hexes[column] != undefined) {
-				return hexes[column][row];
-    		}
-    		return null;
-		}
+        var c = document.getElementById("a").getContext("2d");
+        for (column = 0; column < NUM_COLUMNS; column = column + 1) {
+          hexes[column] = [];
+          for (row = 0; row < NUM_ROWS; row = row + 1) {
+            hexes[column][row] = newHexes[column][row];
+            hexes[column][row].draw(c);
+          }
+        }
+        if (document.getElementById("auto").checked) {
+          setTimeout(next, 200);
+        }
+      }
 
-    	</script>
-    </head>
-    <body onload='init()'>
-        <canvas id="a" width="800" height="600">
-        </canvas>
-		<input type='button' value='Time++' onclick='next();' class='prime' />
-		<label for='auto'><input type='checkbox' value='auto' id='auto' />Run</label>
-		<br />
-		<p>Click on a tile to add...<br />
-		<label for='fire' class='Fire'><input id='fire' type="radio" name="use" value="Fire" checked='true'>fire</label>
-		<label for='water' class='Water'><input id='water' type="radio" name="use" value="Water">water</label>
-		<label for='grass'class='Grass'><input id='grass' type="radio" name="use" value="Grass">grass</label>
-		<label for='tree'class='Tree'><input id='tree' type="radio" name="use" value="Tree">tree</label>
-		<label for='rabbit'class='Rabbit'><input id='rabbit' type="radio" name="use" value="Rabbit">rabbit</label>
-		<label for='wolf'class='Wolf'><input id='wolf' type="radio" name="use" value="Wolf">wolf</label>
-		</p>
-		<h3>Instructions</h3>
-		<p>Click time++ to make time move forward one turn.</p>
-		<p>Check 'auto' then click 'time++' to make time run forward automatically.</p>
-		<p>Click on the field to turn a tile into 'fire, water, grass, tree, rabbit or wolf.'</p>
-		<p>Each type interacts with the others in different ways.</p>
-		<p><a href='index.html'>&larr; back</a></p>
-    </body>
+      function getNeighbors(column, row) {
+        if (row == undefined) {
+          //this is a mistake i make too often -- thinking i can pass a point to this function
+          alert("getNeighbors requires a column and a row");
+        }
+        var shift, neighbors;
+        shift = column % 2; //funky hex layout magic
+        neighbors = [];
+        neighbors[0] = getHex(column, row - 1);
+        neighbors[1] = getHex(column + 1, row - 1 + shift);
+        neighbors[2] = getHex(column + 1, row + shift);
+        neighbors[3] = getHex(column, row + 1);
+        neighbors[4] = getHex(column - 1, row + shift);
+        neighbors[5] = getHex(column - 1, row - 1 + shift);
+        return neighbors;
+      }
+
+      function getHex(column, row) {
+        if (column >= 0 && row >= 0 && hexes[column] != undefined) {
+          return hexes[column][row];
+        }
+        return null;
+      }
+    </script>
+  </head>
+  <body onload="init()">
+    <canvas id="a" width="800" height="600"> </canvas>
+    <input type="button" value="Time++" onclick="next();" class="prime" />
+    <label for="auto"
+      ><input type="checkbox" value="auto" id="auto" />Run</label
+    >
+    <br />
+    <p>
+      Click on a tile to add...<br />
+      <label for="fire" class="Fire"
+        ><input
+          id="fire"
+          type="radio"
+          name="use"
+          value="Fire"
+          checked="true"
+        />fire</label
+      >
+      <label for="water" class="Water"
+        ><input id="water" type="radio" name="use" value="Water" />water</label
+      >
+      <label for="grass" class="Grass"
+        ><input id="grass" type="radio" name="use" value="Grass" />grass</label
+      >
+      <label for="tree" class="Tree"
+        ><input id="tree" type="radio" name="use" value="Tree" />tree</label
+      >
+      <label for="rabbit" class="Rabbit"
+        ><input
+          id="rabbit"
+          type="radio"
+          name="use"
+          value="Rabbit"
+        />rabbit</label
+      >
+      <label for="wolf" class="Wolf"
+        ><input id="wolf" type="radio" name="use" value="Wolf" />wolf</label
+      >
+    </p>
+    <h3>Instructions</h3>
+    <p>Click time++ to make time move forward one turn.</p>
+    <p>
+      Check 'auto' then click 'time++' to make time run forward automatically.
+    </p>
+    <p>
+      Click on the field to turn a tile into 'fire, water, grass, tree, rabbit
+      or wolf.'
+    </p>
+    <p>Each type interacts with the others in different ways.</p>
+    <p><a href="index.html">&larr; back</a></p>
+  </body>
 </html>

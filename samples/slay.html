@@ -1,282 +1,350 @@
-<html>
-    <head>
-        <!--[if IE]>
-            <script src="excanvas.compiled.js">
-            </script>
-        <![endif]-->
-        <style>
-            #a{border:1px dotted #888;float:left;} .info {border:1px solid #FFF;padding:10px;clear:right}
-            input{height:50px;padding-right:50px;}
-        </style>
-        <script src="hash.js"></script>
-        <script src="..\lib\hexerly.js"></script>
-        <script>
-var hip, hp, manImages, tombImage, treeImage, im, manTypes, manPrices, manCosts, redBorders, targets, im, hand, starting_money_per_hex, hexes, scale, turfColors, flagColors, currentKingdom, kingdoms, TILE_WIDTH, TILE_HEIGHT, HEX_SLOPE, MAX_X, MAX_Y, currentTeam, turn;
+<html lang="en">
+  <head>
+    <title>Slay clone - Hexerly</title>
+    <meta
+      charset="utf-8"
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <!--[if IE]>
+      <script src="excanvas.compiled.js"></script>
+    <![endif]-->
+    <style>
+      #a {
+        border: 1px dotted #888;
+        float: left;
+      }
+      .info {
+        border: 1px solid #fff;
+        padding: 10px;
+        clear: right;
+      }
+      input {
+        height: 50px;
+        padding-right: 50px;
+      }
+    </style>
+    <script src="hash.js"></script>
+    <script src="..\lib\hexerly.js"></script>
+    <script>
+      var hip,
+        hp,
+        manImages,
+        tombImage,
+        treeImage,
+        im,
+        manTypes,
+        manPrices,
+        manCosts,
+        redBorders,
+        targets,
+        im,
+        hand,
+        starting_money_per_hex,
+        hexes,
+        scale,
+        turfColors,
+        flagColors,
+        currentKingdom,
+        kingdoms,
+        TILE_WIDTH,
+        TILE_HEIGHT,
+        HEX_SLOPE,
+        MAX_X,
+        MAX_Y,
+        currentTeam,
+        turn;
 
-function myType(thing) {
-    //not a good enough function to be called 'TypeOf' but 
-    //good enough to tell if a thing is one of __my__ types.
-    if (thing == undefined) return "";
-    if (thing.constructor == undefined) return "";
-    return thing.constructor.name;
-}
+      function myType(thing) {
+        //not a good enough function to be called 'TypeOf' but
+        //good enough to tell if a thing is one of __my__ types.
+        if (thing == undefined) return "";
+        if (thing.constructor == undefined) return "";
+        return thing.constructor.name;
+      }
 
-redBorders = [];
-starting_money_per_hex = 4;
-manTypes = ['peasant', 'spear-man', 'knight', 'lord'];
-manPrices = [10, 10, 10, 10];
-manCosts = [2, 8, 16, 52];
-//buildingTypes = ['castle'];//buildingPrices = [15];//buildingCosts = [0]; 
-currentKingdom = [];
-kingdoms = new Hash();
-scale = 1.0;
-TILE_WIDTH = 21 * scale;
-TILE_HEIGHT = 24 * scale;
-MAX_Y = 16;
-MAX_X = 25;
-HEX_SLOPE = 12.0 / 7.0;
-turfColors = ['#4F4', '#482', '#2A5', '#5A0', '#7C2', '#060']; //team Turf colors.
-flagColors = ['#F00', '#FF0', '#00F', '#F80', '#F0F', '#0FF']; //team Flag colors.
+      redBorders = [];
+      starting_money_per_hex = 4;
+      manTypes = ["peasant", "spear-man", "knight", "lord"];
+      manPrices = [10, 10, 10, 10];
+      manCosts = [2, 8, 16, 52];
+      //buildingTypes = ['castle'];//buildingPrices = [15];//buildingCosts = [0];
+      currentKingdom = [];
+      kingdoms = new Hash();
+      scale = 1.0;
+      TILE_WIDTH = 21 * scale;
+      TILE_HEIGHT = 24 * scale;
+      MAX_Y = 16;
+      MAX_X = 25;
+      HEX_SLOPE = 12.0 / 7.0;
+      turfColors = ["#4F4", "#482", "#2A5", "#5A0", "#7C2", "#060"]; //team Turf colors.
+      flagColors = ["#F00", "#FF0", "#00F", "#F80", "#F0F", "#0FF"]; //team Flag colors.
 
-function drawMan(c, x, y, level) {
-    var xOffset, yOffset;
-    xOffset = (x + 7) * scale;
-    yOffset = (y + 5) * scale;
-    c.drawImage(manImages[level], xOffset, yOffset, 14*scale, 14 * scale);
-}
+      function drawMan(c, x, y, level) {
+        var xOffset, yOffset;
+        xOffset = (x + 7) * scale;
+        yOffset = (y + 5) * scale;
+        c.drawImage(manImages[level], xOffset, yOffset, 14 * scale, 14 * scale);
+      }
 
-function drawTomb(c, x, y) {
-    var xOffset, yOffset;
-    xOffset = (x + 7) * scale;
-    yOffset = (y + 5) * scale;
-    c.drawImage(tombImage, xOffset, yOffset, 14*scale, 14 * scale);
-}
-function drawTree(c, x, y) {
-    var xOffset, yOffset;
-    xOffset = (x + 7) * scale;
-    yOffset = (y + 5) * scale;
-    c.drawImage(treeImage, xOffset, yOffset, 14*scale, 14 * scale);
-}
+      function drawTomb(c, x, y) {
+        var xOffset, yOffset;
+        xOffset = (x + 7) * scale;
+        yOffset = (y + 5) * scale;
+        c.drawImage(tombImage, xOffset, yOffset, 14 * scale, 14 * scale);
+      }
+      function drawTree(c, x, y) {
+        var xOffset, yOffset;
+        xOffset = (x + 7) * scale;
+        yOffset = (y + 5) * scale;
+        c.drawImage(treeImage, xOffset, yOffset, 14 * scale, 14 * scale);
+      }
 
-function drawHexGradient(c, x, y, color, borderColor) {
-  var fillStyle = createGradient(c, x, y, color);
-  drawHex(c,x,y,fillStyle, borderColor);
-}
-function createGradient(c, x, y, fillColor) {
-  scale = 1.0;
-		var gradient = c.createLinearGradient((x + 7) * scale, (y) * scale, (x + 27) * scale, (y + 23) * scale);
-		gradient.addColorStop(0.0, fillColor); 
-		gradient.addColorStop(1.0, "#222"); 
-		return gradient;
-	}
-    
-//function drawHex(c, xOffset, yOffset, color, borderColor) {
-//    if (c == undefined) {
-//        alert("No C!");
-//    }
-//    var i;
-//    c.beginPath();
-//    c.moveTo((hp[0][0] + xOffset) * scale, (hp[0][1] + yOffset) * scale);
-//    for (i = 0; i < 6; i = i + 1) {
-//        c.lineTo((hp[i + 1][0] + xOffset) * scale, (hp[i + 1][1] + yOffset) * scale);
-//   }
-//    c.closePath();
-//    c.strokeStyle = borderColor;
-//    c.stroke();
-//    if (color != "#000") {
-//        c.fillStyle = color;
-//        c.fill();
-//    }
-//}
+      function drawHexGradient(c, x, y, color, borderColor) {
+        var fillStyle = createGradient(c, x, y, color);
+        drawHex(c, x, y, fillStyle, borderColor);
+      }
+      function createGradient(c, x, y, fillColor) {
+        scale = 1.0;
+        var gradient = c.createLinearGradient(
+          (x + 7) * scale,
+          y * scale,
+          (x + 27) * scale,
+          (y + 23) * scale
+        );
+        gradient.addColorStop(0.0, fillColor);
+        gradient.addColorStop(1.0, "#222");
+        return gradient;
+      }
 
-function drawVillage(c, kingdom) {
-    var hex;
-    if (kingdom == undefined || kingdom.hexes == undefined || kingdom.hexes.length <= 1) return;
-	
-    if (kingdom.village != undefined) {
-        kingdom.village.draw(c);
-        return;
-    }
-}
-function $(id) {
-    return document.getElementById(id);
-}
+      //function drawHex(c, xOffset, yOffset, color, borderColor) {
+      //    if (c == undefined) {
+      //        alert("No C!");
+      //    }
+      //    var i;
+      //    c.beginPath();
+      //    c.moveTo((hp[0][0] + xOffset) * scale, (hp[0][1] + yOffset) * scale);
+      //    for (i = 0; i < 6; i = i + 1) {
+      //        c.lineTo((hp[i + 1][0] + xOffset) * scale, (hp[i + 1][1] + yOffset) * scale);
+      //   }
+      //    c.closePath();
+      //    c.strokeStyle = borderColor;
+      //    c.stroke();
+      //    if (color != "#000") {
+      //        c.fillStyle = color;
+      //        c.fill();
+      //    }
+      //}
 
-function $c(id) {
-    return $(id).getContext("2d");
-}
+      function drawVillage(c, kingdom) {
+        var hex;
+        if (
+          kingdom == undefined ||
+          kingdom.hexes == undefined ||
+          kingdom.hexes.length <= 1
+        )
+          return;
 
-function drawVillages() {
-    var key, kingdomID, kingdom, hex, point, arr, c;
-    c = $c("a");
-    for (key in kingdoms.items) {
-        kingdom = kingdoms.items[key];
-        drawVillage(c, kingdom);
-    }
-}
+        if (kingdom.village != undefined) {
+          kingdom.village.draw(c);
+          return;
+        }
+      }
+      function $(id) {
+        return document.getElementById(id);
+      }
 
-function drawSpot(c, xOffset, yOffset, color, width) {
-    xOffset = xOffset * scale;
-    yOffset = yOffset * scale;
-    c.fillStyle = color;
-    c.fillRect((14 * scale) + xOffset - width, (12 * scale) + yOffset - width, width * 2 + 1, width * 2 + 1);
-}
+      function $c(id) {
+        return $(id).getContext("2d");
+      }
 
-function drawHouse(c, x, y) { //TODO: draw amazing house
-    if (y == undefined) {
-        return;
-    }
-    drawSpot(c, x, y, "#8b4513", 4);
-    drawSpot(c, x, y, "#Ab6533", 3);
-}
+      function drawVillages() {
+        var key, kingdomID, kingdom, hex, point, arr, c;
+        c = $c("a");
+        for (key in kingdoms.items) {
+          kingdom = kingdoms.items[key];
+          drawVillage(c, kingdom);
+        }
+      }
 
-//function drawHexBorder(c, xOffset, yOffset, borderColors) { 
-//    //    0-1--
-//    // 6 /     \ 2
-//    // 5 \     / 3
-//    //    --4--
-//    var i;
-//    for (i = 0; i < 6; i = i + 1) {
-//        c.beginPath();
-//        c.moveTo((hip[i][0] + xOffset) * scale, (hip[i][1] + yOffset) * scale);
-//        c.lineTo((hip[i + 1][0] + xOffset) * scale, (hip[i + 1][1] + yOffset) * scale);
-//        c.strokeStyle = borderColors[i];
-//        c.closePath();
-//       c.stroke();
-//    }
-//}
+      function drawSpot(c, xOffset, yOffset, color, width) {
+        xOffset = xOffset * scale;
+        yOffset = yOffset * scale;
+        c.fillStyle = color;
+        c.fillRect(
+          14 * scale + xOffset - width,
+          12 * scale + yOffset - width,
+          width * 2 + 1,
+          width * 2 + 1
+        );
+      }
 
-function drawFlag(c, xOffset, yOffset, color) {
-    var width;
-    width = 2;
-    xOffset = xOffset * scale;
-    yOffset = yOffset * scale;
-    c.fillStyle = color;
-    c.fillRect((14 * scale) + xOffset - width, (12 * scale) + yOffset - width - 7, width * 2 + 1, width * 2 - 1);
-    c.beginPath();
-    c.moveTo((14 * scale) + xOffset - width, (12 * scale) + yOffset - width - 8);
-    c.lineTo((14 * scale) + xOffset - width, (12 * scale) + yOffset - width - 1);
-    c.closePath();
-    c.strokeStyle = color;
-    c.stroke();
-}
+      function drawHouse(c, x, y) {
+        //TODO: draw amazing house
+        if (y == undefined) {
+          return;
+        }
+        drawSpot(c, x, y, "#8b4513", 4);
+        drawSpot(c, x, y, "#Ab6533", 3);
+      }
 
-//function columnRowToXY(x, y) {
-//    return [(x - 1) * 21, (y - 1) * 24 + ((x) % 2 * 12)];
-//}
+      //function drawHexBorder(c, xOffset, yOffset, borderColors) {
+      //    //    0-1--
+      //    // 6 /     \ 2
+      //    // 5 \     / 3
+      //    //    --4--
+      //    var i;
+      //    for (i = 0; i < 6; i = i + 1) {
+      //        c.beginPath();
+      //        c.moveTo((hip[i][0] + xOffset) * scale, (hip[i][1] + yOffset) * scale);
+      //        c.lineTo((hip[i + 1][0] + xOffset) * scale, (hip[i + 1][1] + yOffset) * scale);
+      //        c.strokeStyle = borderColors[i];
+      //        c.closePath();
+      //       c.stroke();
+      //    }
+      //}
 
-//function xyToColumnRow(aX, aY) {
-//    aX = aX + TILE_WIDTH; //was 21
-//    aY = aY + TILE_HEIGHT; //was 24
-//    var gX, gY, fX, fY, retX, retY;
-//    gX = Math.floor(aX / TILE_WIDTH);
-//    gY = Math.floor(aY / TILE_HEIGHT);
-//    fX = (aX / TILE_WIDTH) - gX;
-//    fY = (aY / TILE_HEIGHT) - gY;
-//    if ((Math.abs(gX) & 1) == 1) {
-//        if (fY > 0.5) {
-//            if (1.0 - fX * HEX_SLOPE < fY) {
-//                retX = gX;
-//                retY = gY;
-//            }
-//            else {
-//                retX = gX - 1;
-//                retY = gY;
-//            }
-//        } else {
-//            if (fX * HEX_SLOPE > fY) {
-//                retX = gX;
-//                retY = gY - 1;
-//            } else {
-//                retX = gX - 1;
-//                retY = gY;
-//            }
-//        }
-//    }
-//    else {
-//        if (fY > 0.5) {
-//            if (fY - 0.5 < fX * HEX_SLOPE) {
-//                retX = gX;
-//                retY = gY;
-//            } else {
-//                retX = gX - 1;
-//                retY = gY;
-//            }
-//        } else {
-//            if (fY - 0.5 > fX * HEX_SLOPE * -1) {
-//                retX = gX;
-//                retY = gY;
-//            } else {
-//                retX = gX - 1;
-//                retY = gY - 1;
-//            }
-//        }
-//    }
-//    return [retX, retY];
-//}
+      function drawFlag(c, xOffset, yOffset, color) {
+        var width;
+        width = 2;
+        xOffset = xOffset * scale;
+        yOffset = yOffset * scale;
+        c.fillStyle = color;
+        c.fillRect(
+          14 * scale + xOffset - width,
+          12 * scale + yOffset - width - 7,
+          width * 2 + 1,
+          width * 2 - 1
+        );
+        c.beginPath();
+        c.moveTo(
+          14 * scale + xOffset - width,
+          12 * scale + yOffset - width - 8
+        );
+        c.lineTo(
+          14 * scale + xOffset - width,
+          12 * scale + yOffset - width - 1
+        );
+        c.closePath();
+        c.strokeStyle = color;
+        c.stroke();
+      }
 
-function Tombstone() {
-    this.level = 0;
-    this.moved = true;
-    
-    this.type = function () {
-        return "Tombstone";
-    };
-    this.price = function () {
-        return 0;
-    };
+      //function columnRowToXY(x, y) {
+      //    return [(x - 1) * 21, (y - 1) * 24 + ((x) % 2 * 12)];
+      //}
 
-    this.cost = function () {
-        return 0;
-    };
-}
+      //function xyToColumnRow(aX, aY) {
+      //    aX = aX + TILE_WIDTH; //was 21
+      //    aY = aY + TILE_HEIGHT; //was 24
+      //    var gX, gY, fX, fY, retX, retY;
+      //    gX = Math.floor(aX / TILE_WIDTH);
+      //    gY = Math.floor(aY / TILE_HEIGHT);
+      //    fX = (aX / TILE_WIDTH) - gX;
+      //    fY = (aY / TILE_HEIGHT) - gY;
+      //    if ((Math.abs(gX) & 1) == 1) {
+      //        if (fY > 0.5) {
+      //            if (1.0 - fX * HEX_SLOPE < fY) {
+      //                retX = gX;
+      //                retY = gY;
+      //            }
+      //            else {
+      //                retX = gX - 1;
+      //                retY = gY;
+      //            }
+      //        } else {
+      //            if (fX * HEX_SLOPE > fY) {
+      //                retX = gX;
+      //                retY = gY - 1;
+      //            } else {
+      //                retX = gX - 1;
+      //                retY = gY;
+      //            }
+      //        }
+      //    }
+      //    else {
+      //        if (fY > 0.5) {
+      //            if (fY - 0.5 < fX * HEX_SLOPE) {
+      //                retX = gX;
+      //                retY = gY;
+      //            } else {
+      //                retX = gX - 1;
+      //                retY = gY;
+      //            }
+      //        } else {
+      //            if (fY - 0.5 > fX * HEX_SLOPE * -1) {
+      //                retX = gX;
+      //                retY = gY;
+      //            } else {
+      //                retX = gX - 1;
+      //                retY = gY - 1;
+      //            }
+      //        }
+      //    }
+      //    return [retX, retY];
+      //}
 
-function Tree() {
-    this.level = 0;
-    this.moved = true;
-    this.type = function () {
-        return "Tree";
-    };
-    this.price = function () {
-        return 0;
-    };
-    this.cost = function () {
-        return 0;
-    };
-}
+      function Tombstone() {
+        this.level = 0;
+        this.moved = true;
 
+        this.type = function () {
+          return "Tombstone";
+        };
+        this.price = function () {
+          return 0;
+        };
 
-function Village() {
-    this.level = 0;
-    this.moved = false;
-    
-    this.type = function () {
-        return "Village";
-    };
-    this.price = function () {
-        return 0;
-    };
+        this.cost = function () {
+          return 0;
+        };
+      }
 
-    this.cost = function () {
-        return 0;
-    };
-}
-function Man() {
-    this.level = 1;
-    this.moved = false;
-    
-    this.type = function () {
-        return manTypes[this.level - 1];
-    };
-    this.price = function () {
-        return manPrices[this.level - 1];
-    };
+      function Tree() {
+        this.level = 0;
+        this.moved = true;
+        this.type = function () {
+          return "Tree";
+        };
+        this.price = function () {
+          return 0;
+        };
+        this.cost = function () {
+          return 0;
+        };
+      }
 
-    this.cost = function () {
-        return manCosts[this.level - 1];
-    };
-}
-/*
+      function Village() {
+        this.level = 0;
+        this.moved = false;
+
+        this.type = function () {
+          return "Village";
+        };
+        this.price = function () {
+          return 0;
+        };
+
+        this.cost = function () {
+          return 0;
+        };
+      }
+      function Man() {
+        this.level = 1;
+        this.moved = false;
+
+        this.type = function () {
+          return manTypes[this.level - 1];
+        };
+        this.price = function () {
+          return manPrices[this.level - 1];
+        };
+
+        this.cost = function () {
+          return manCosts[this.level - 1];
+        };
+      }
+      /*
 function Building() {
     this.level = 1;
     this.type = function () {
@@ -290,243 +358,282 @@ function Building() {
     }
 }
 */
-function Hex(team, x, y) {
-    this.team = team;
-    this.x = x;
-    this.y = y;
-    this.name = x + ", " + y;
-    this.holding = null;
+      function Hex(team, x, y) {
+        this.team = team;
+        this.x = x;
+        this.y = y;
+        this.name = x + ", " + y;
+        this.holding = null;
 
-    this.draw = function (c) {
-        var point, color;
-        point = columnRowToXY(this.x, this.y);
-        color = turfColors[this.team];
-        drawHexGradient(c, point[0], point[1], color, "#CCC");
+        this.draw = function (c) {
+          var point, color;
+          point = columnRowToXY(this.x, this.y);
+          color = turfColors[this.team];
+          drawHexGradient(c, point[0], point[1], color, "#CCC");
 
-        //now draw the thing it's holding...
-        if (this.highlightColors != undefined && this.highlightColors != null) {
+          //now draw the thing it's holding...
+          if (
+            this.highlightColors != undefined &&
+            this.highlightColors != null
+          ) {
             drawHexBorder(c, point[0], point[1], this.highlightColors);
-        }
+          }
 
-        if (this.holding != null && this.holding.constructor.name == "Man" ) {
-            drawMan(c, point[0], point[1], (this.holding.level - 1)); //, "peasant0_0.PNG");
-            drawMan(c, point[0], point[1], (this.holding.level - 1)); //, "peasant0_0.PNG");
-			if (this.holding.moved == false) { // && this.team == currentTeam) {
-			  drawSpot(c, point[0], point[1]+7, "#FF0000", 1);
-			}
-        }
-		
-        if (this.holding != null) {
-            if (this.holding.constructor.name == "Tombstone" ) {
-              drawTomb(c, point[0], point[1])
-			}
-			if (this.holding.constructor.name == "Tree" ) {
-              drawTree(c, point[0], point[1])
-			}
-		}
-        if (this.kingdom != null && this.kingdom.village != null && this.kingdom.village == this) {
+          if (this.holding != null && this.holding.constructor.name == "Man") {
+            drawMan(c, point[0], point[1], this.holding.level - 1); //, "peasant0_0.PNG");
+            drawMan(c, point[0], point[1], this.holding.level - 1); //, "peasant0_0.PNG");
+            if (this.holding.moved == false) {
+              // && this.team == currentTeam) {
+              drawSpot(c, point[0], point[1] + 7, "#FF0000", 1);
+            }
+          }
+
+          if (this.holding != null) {
+            if (this.holding.constructor.name == "Tombstone") {
+              drawTomb(c, point[0], point[1]);
+            }
+            if (this.holding.constructor.name == "Tree") {
+              drawTree(c, point[0], point[1]);
+            }
+          }
+          if (
+            this.kingdom != null &&
+            this.kingdom.village != null &&
+            this.kingdom.village == this
+          ) {
             drawHouse(c, point[0], point[1]);
             //have enough money to buy the cheapest thing on the menu? wave a flag.
             if (this.kingdom.money >= manPrices[0] && this.team == 0) {
-                drawFlag(c, point[0], point[1], flagColors[this.team]);
+              drawFlag(c, point[0], point[1], flagColors[this.team]);
             }
-        }
-    };
-	
-	this.hasVillage = function() {
-	  if (this.holding != null && myType(this.holding) == 'Village') {
-	    return true;
-	  }
-	  return false;
-	}
-}
+          }
+        };
 
-function Hand() {
-    this.thingsHeld = [];
-    this.pickup = function (thing, from) {
-        //hack: assumes thing is a man.
-        if (this.level() + thing.level > manTypes.length) {
+        this.hasVillage = function () {
+          if (this.holding != null && myType(this.holding) == "Village") {
+            return true;
+          }
+          return false;
+        };
+      }
+
+      function Hand() {
+        this.thingsHeld = [];
+        this.pickup = function (thing, from) {
+          //hack: assumes thing is a man.
+          if (this.level() + thing.level > manTypes.length) {
             return false;
-        }
-        //todo: can't pick up extra castles if carrying a castle already
-        //todo: if holding men and get a castle-- drop the men. and vice versa.
-        var thingHeld;
-        thingHeld = {};
-        thingHeld.thing = thing;
-        thingHeld.from = from;
+          }
+          //todo: can't pick up extra castles if carrying a castle already
+          //todo: if holding men and get a castle-- drop the men. and vice versa.
+          var thingHeld;
+          thingHeld = {};
+          thingHeld.thing = thing;
+          thingHeld.from = from;
 
-        if (myType(from) == "Hex") { //.constructor != undefined && from.constructor.name == "Hex") {
+          if (myType(from) == "Hex") {
+            //.constructor != undefined && from.constructor.name == "Hex") {
             //no longer held by the hex we took it from.
             //that code smell is because we knew too much about the innards of a hex
             from.holding = null;
-        } else if (myType(from) == "Kingdom") { //from.constructor != undefined && from.constructor.name == "Kingdom") {
+          } else if (myType(from) == "Kingdom") {
+            //from.constructor != undefined && from.constructor.name == "Kingdom") {
             //must be purchased from a kingdom (not picked up off a hex)...
             //deduct the price of the thing from the kingdom...
-            from.money = from.money - thing.price();	
-		}
-        this.thingsHeld[this.thingsHeld.length] = thingHeld;
-        return true;
-    };
+            from.money = from.money - thing.price();
+          }
+          this.thingsHeld[this.thingsHeld.length] = thingHeld;
+          return true;
+        };
 
-    this.level = function () {
-        //the sum of all levels of things that are held.
-        var i, _level;
-        _level = 0;
-        for (i = 0; i < this.thingsHeld.length; i = i + 1) {
+        this.level = function () {
+          //the sum of all levels of things that are held.
+          var i, _level;
+          _level = 0;
+          for (i = 0; i < this.thingsHeld.length; i = i + 1) {
             _level = _level + this.thingsHeld[i].thing.level;
-        }
-        return _level;
-    };
+          }
+          return _level;
+        };
 
-    this.putDown = function (hex) {
-        var thing, baseLevel, currentLevel, moved;
-		moved = false;
-        currentLevel = this.level();
-        baseLevel = 0;
-        if (hex.holding != null) {
-            if (myType(hex.holding) != "Tombstone" && myType(hex.holding) != "Tree" && myType(hex.holding) != myType(this.thingsHeld[0].thing)) {
-                //Can't add one of those to one of these!
-                //(i.e. trying to put a man in a building or a building on a man)
-                return "Can't place a " + myType(this.thingsHeld[0].thing) + " on a " + myType(hex.holding);
+        this.putDown = function (hex) {
+          var thing, baseLevel, currentLevel, moved;
+          moved = false;
+          currentLevel = this.level();
+          baseLevel = 0;
+          if (hex.holding != null) {
+            if (
+              myType(hex.holding) != "Tombstone" &&
+              myType(hex.holding) != "Tree" &&
+              myType(hex.holding) != myType(this.thingsHeld[0].thing)
+            ) {
+              //Can't add one of those to one of these!
+              //(i.e. trying to put a man in a building or a building on a man)
+              return (
+                "Can't place a " +
+                myType(this.thingsHeld[0].thing) +
+                " on a " +
+                myType(hex.holding)
+              );
             }
             baseLevel = hex.holding.level;
             if (currentLevel + baseLevel > manTypes.length) {
-                //can't create a super man, or a super building.
-                return "Can't add a " + manTypes[baseLevel - 1] + " to a " + manTypes[currentLevel - 1];
+              //can't create a super man, or a super building.
+              return (
+                "Can't add a " +
+                manTypes[baseLevel - 1] +
+                " to a " +
+                manTypes[currentLevel - 1]
+              );
             }
-		    moved = hex.holding.moved;			
-        }
-        thing = this.thingsHeld[0].thing;
-        thing.level = currentLevel + baseLevel;
-        hex.holding = thing;
-		hex.holding.moved = moved; //todo: more logic to this... need to check in the game
-        
-        this.thingsHeld = [];
-		return null;
-    };
+            moved = hex.holding.moved;
+          }
+          thing = this.thingsHeld[0].thing;
+          thing.level = currentLevel + baseLevel;
+          hex.holding = thing;
+          hex.holding.moved = moved; //todo: more logic to this... need to check in the game
 
-    this.holding = function () {
-        if (this.thingsHeld.length == 0) return null;
-        var thing;
-        thing = new Man();
-        thing.level = this.level();
-        return thing;
-    };
+          this.thingsHeld = [];
+          return null;
+        };
 
-    this.drop = function () {
-        var i, thingHeld;
+        this.holding = function () {
+          if (this.thingsHeld.length == 0) return null;
+          var thing;
+          thing = new Man();
+          thing.level = this.level();
+          return thing;
+        };
 
-        for (i = 0; i < this.thingsHeld.length; i = i + 1) {
+        this.drop = function () {
+          var i, thingHeld;
+
+          for (i = 0; i < this.thingsHeld.length; i = i + 1) {
             thingHeld = this.thingsHeld[i];
-            if (thingHeld.from.constructor != undefined && thingHeld.from.constructor.name == "Hex") {
-                thingHeld.from.holding = thingHeld.thing;
+            if (
+              thingHeld.from.constructor != undefined &&
+              thingHeld.from.constructor.name == "Hex"
+            ) {
+              thingHeld.from.holding = thingHeld.thing;
             } else {
-			    thingHeld.from.money = thingHeld.from.money + thingHeld.thing.price();				
+              thingHeld.from.money =
+                thingHeld.from.money + thingHeld.thing.price();
             }
-        }
+          }
 
-        //and empty the list of things held. they are no more.
-        this.thingsHeld = [];
-    };
-}
+          //and empty the list of things held. they are no more.
+          this.thingsHeld = [];
+        };
+      }
 
-function Kingdom() {
-    this.hexes = [];
-    this.money = 0;
-    this.profit = 0;
-    this.village = null; //hex where the village sits
-  
-    //each kingdom is named after its first member
-    this.name = function () {
-        if (this.hexes != undefined && this.hexes.length > 0) {
+      function Kingdom() {
+        this.hexes = [];
+        this.money = 0;
+        this.profit = 0;
+        this.village = null; //hex where the village sits
+
+        //each kingdom is named after its first member
+        this.name = function () {
+          if (this.hexes != undefined && this.hexes.length > 0) {
             return this.hexes[0].name;
-        }
-        return 'water';
-    };
+          }
+          return "water";
+        };
 
-    this.team = function () {
-        if (this.hexes != undefined && this.hexes.length > 0 && this.hexes[0].team != undefined) {
+        this.team = function () {
+          if (
+            this.hexes != undefined &&
+            this.hexes.length > 0 &&
+            this.hexes[0].team != undefined
+          ) {
             return this.hexes[0].team;
+          }
+          return -1;
+        };
+
+        this.assignVillage = function (oldKingdom1, oldKingdom2) {
+          if (
+            oldKingdom1.hexes != null &&
+            (oldKingdom2.hexes == null ||
+              oldKingdom1.hexes.length >= oldKingdom2.hexes.length)
+          ) {
+            this.village = oldKingdom1.village;
+          } else {
+            this.village = oldKingdom2.village;
+          }
+          if (
+            this.village == null &&
+            this.hexes != null &&
+            this.hexes.length > 0
+          ) {
+            this.village = this.hexes[0];
+          }
+          if (this.village != null) {
+            this.village.holding = new Village();
+          }
+        };
+      }
+
+      function Water(x, y) {
+        this.x = x;
+        this.y = y;
+        this.name = "water";
+
+        this.draw = function (c) {
+          var point;
+          point = columnRowToXY(this.x, this.y);
+          drawHex(c, point[0], point[1], "#08C", "#CCC");
+        };
+        this.hasVillage = function () {
+          return false;
+        };
+      }
+
+      function init() {
+        hand = new Hand();
+        turn = 0; //first turn
+        manImages = [];
+        currentTeam = 0;
+        var i, kingdomID, im, x, y, c, point, canvas, team, color;
+        showColors();
+        for (i = 0; i < manTypes.length; i = i + 1) {
+          im = new Image();
+          im.src = "images/peasant0_" + i + ".gif";
+          manImages[i] = im;
         }
-        return -1;
-    };
-	
-	this.assignVillage = function(oldKingdom1, oldKingdom2) {
-	  if (oldKingdom1.hexes != null && (oldKingdom2.hexes == null || oldKingdom1.hexes.length >= oldKingdom2.hexes.length)) {
-	    this.village = oldKingdom1.village;
-      }	else {
-	    this.village = oldKingdom2.village;
-      }	  
-	  if (this.village == null && this.hexes != null && this.hexes.length > 0) {
-	    this.village = this.hexes[0];
-	  }
-	  if (this.village != null) {
-	    this.village.holding = new Village();
-	  }
-	}
-                      
-}
 
-function Water(x, y) {
-    this.x = x;
-    this.y = y;
-    this.name = 'water';
-	
-    this.draw = function (c) {
-        var point;
-        point = columnRowToXY(this.x, this.y);
-        drawHex(c, point[0], point[1], "#08C", "#CCC");
-    };
-	this.hasVillage	= function() {
-	    return false;	
-	}
-}
+        tombImage = new Image();
+        tombImage.src = "images/tombstone.gif";
 
-function init() {
-    hand = new Hand();
-	turn = 0; //first turn
-    manImages = [];
-    currentTeam = 0;
-    var i, kingdomID, im, x, y, c, point, canvas, team, color;
-    showColors();    
-    for (i = 0; i < manTypes.length; i = i + 1) {
-        im = new Image();
-        im.src = "images/peasant0_" + i + ".gif";
-        manImages[i] = im;
-    }
+        treeImage = new Image();
+        treeImage.src = "images/tree.gif";
 
-	tombImage = new Image();
-	tombImage.src = "images/tombstone.gif";
-	
-	treeImage = new Image();
-	treeImage.src = "images/tree.gif";
-	
-    for (i = 0; i < 6; i = i + 1) {
-        redBorders[i] = "#F00";
-    }
+        for (i = 0; i < 6; i = i + 1) {
+          redBorders[i] = "#F00";
+        }
 
-    hp = []; //hexpoints
-    //    0-1--
-    // 6 /     \ 2
-    // 5 \     / 3
-    //    --4--
-    hp[0] = [7, 0];
-    hp[1] = [21, 0];
-    hp[2] = [28, 12];
-    hp[3] = [21, 24];
-    hp[4] = [7, 24];
-    hp[5] = [0, 12];
-    hp[6] = hp[0];
+        hp = []; //hexpoints
+        //    0-1--
+        // 6 /     \ 2
+        // 5 \     / 3
+        //    --4--
+        hp[0] = [7, 0];
+        hp[1] = [21, 0];
+        hp[2] = [28, 12];
+        hp[3] = [21, 24];
+        hp[4] = [7, 24];
+        hp[5] = [0, 12];
+        hp[6] = hp[0];
 
-    hip = []; //hex inner points
-    hip[0] = [8, 1];
-    hip[1] = [20, 1];
-    hip[2] = [26.5, 12];
-    hip[3] = [20, 23];
-    hip[4] = [8, 23];
-    hip[5] = [1.5, 12];
-    hip[6] = hip[0];
-/*
+        hip = []; //hex inner points
+        hip[0] = [8, 1];
+        hip[1] = [20, 1];
+        hip[2] = [26.5, 12];
+        hip[3] = [20, 23];
+        hip[4] = [8, 23];
+        hip[5] = [1.5, 12];
+        hip[6] = hip[0];
+        /*
   Testing out the hash clash
   var h,ex,k;
   h = new Hash();
@@ -550,326 +657,392 @@ function init() {
     }
   }
   */
-    hexes = [];
-    c = $c("a");
-	c.shadowBlur = 3; //test;
-	c.lineWidth = 0.5;
-	c.shadowColor = "#666"; //test;
-        
-    for (x = 0; x < MAX_X; x = x + 1) {
-        hexes[x] = [];
-        for (y = 0; y < MAX_Y; y = y + 1) {
+        hexes = [];
+        c = $c("a");
+        c.shadowBlur = 3; //test;
+        c.lineWidth = 0.5;
+        c.shadowColor = "#666"; //test;
+
+        for (x = 0; x < MAX_X; x = x + 1) {
+          hexes[x] = [];
+          for (y = 0; y < MAX_Y; y = y + 1) {
             team = pickIndex(turfColors.length);
             hexes[x][y] = new Hex(team, x, y);
             color = turfColors[team];
-            if (x < 2 || y < 2 || (x + 3 > MAX_X) || (y + 3 > MAX_Y)) {
-                hexes[x][y] = new Water(x, y);
+            if (x < 2 || y < 2 || x + 3 > MAX_X || y + 3 > MAX_Y) {
+              hexes[x][y] = new Water(x, y);
             }
             hexes[x][y].draw(c);
+          }
         }
-    }
-	//emulsify(c);
-    canvas = $("a");
-    canvas.addEventListener("click", function (e) {
-        clicked(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
-    }, false);
-    findKingdoms();
-    drawVillages();
-    for (kingdomID in kingdoms.items) {
-	    if (kingdomID != 'water') {
-          kingdoms.items[kingdomID].money = kingdoms.items[kingdomID].hexes.length * starting_money_per_hex;
-		}
-    }
-}
-function emulsify(c) {
-    if (c === undefined) {
-	  c = $c("a");  
-	}
-    var x, y, k, water, neighbors;
-	for (em = 0; em < 1; em = em + 1) {
-    for (x = 0; x < MAX_X; x = x + 1) {
-        for (y = 0; y < MAX_Y; y = y + 1) {
-            if (hexes[x][y].constructor.name != 'Water') {
-			    neighbors = getNeighbors(x, y);
-				water = 0;
-				for (k = 0; k < 6; k = k + 1) {
-                  if (neighbors[k] != undefined && neighbors[k].constructor.name == 'Water') {
+        //emulsify(c);
+        canvas = $("a");
+        canvas.addEventListener(
+          "click",
+          function (e) {
+            clicked(
+              e.clientX - canvas.offsetLeft,
+              e.clientY - canvas.offsetTop
+            );
+          },
+          false
+        );
+        findKingdoms();
+        drawVillages();
+        for (kingdomID in kingdoms.items) {
+          if (kingdomID != "water") {
+            kingdoms.items[kingdomID].money =
+              kingdoms.items[kingdomID].hexes.length * starting_money_per_hex;
+          }
+        }
+      }
+      function emulsify(c) {
+        if (c === undefined) {
+          c = $c("a");
+        }
+        var x, y, k, water, neighbors;
+        for (em = 0; em < 1; em = em + 1) {
+          for (x = 0; x < MAX_X; x = x + 1) {
+            for (y = 0; y < MAX_Y; y = y + 1) {
+              if (hexes[x][y].constructor.name != "Water") {
+                neighbors = getNeighbors(x, y);
+                water = 0;
+                for (k = 0; k < 6; k = k + 1) {
+                  if (
+                    neighbors[k] != undefined &&
+                    neighbors[k].constructor.name == "Water"
+                  ) {
                     water = water + 1;
-				  }
-				}
-				if (water == 1) { water = 3 };
-				if (Math.floor((Math.random() * 12)) < water) {
+                  }
+                }
+                if (water == 1) {
+                  water = 3;
+                }
+                if (Math.floor(Math.random() * 12) < water) {
                   hexes[x][y] = new Water(x, y);
-				  hexes[x][y].draw(c);
-				}
+                  hexes[x][y].draw(c);
+                }
+              }
             }
-            
-		}
-	}
-	}
-}
-function makeTrees() {
-    var trees, x, y, hex, c; 
-	trees = [];
-    //first, clear all kingdoms.
-	for (x = 0; x < MAX_X; x = x + 1) {
-        for (y = 0; y < MAX_Y; y = y + 1) {
+          }
+        }
+      }
+      function makeTrees() {
+        var trees, x, y, hex, c;
+        trees = [];
+        //first, clear all kingdoms.
+        for (x = 0; x < MAX_X; x = x + 1) {
+          for (y = 0; y < MAX_Y; y = y + 1) {
             hex = hexes[x][y];
-			if (hex.holding == null) {
-			  //count surrounding trees.
-			  //greater than 1? tree time!
-			};
-			if (hex.holding != null && hex.holding.constructor.name == "Tombstone") {
-			  trees[trees.length] = hex;
-			  //say('will make a tree at ' + hex.x + ',' + hex.y);
-			}
-            
-		}
-	}
-	c = $c("a");
-	if (trees.length > 0) {
-	  for (x = 0; x < trees.length; x = x + 1) {
-	    trees[x].holding = new Tree();
-		trees[x].draw(c);
-		//say('draw the tree at ' + hex.x + ',' + hex.y);
-	  }
-	}
-}
+            if (hex.holding == null) {
+              //count surrounding trees.
+              //greater than 1? tree time!
+            }
+            if (
+              hex.holding != null &&
+              hex.holding.constructor.name == "Tombstone"
+            ) {
+              trees[trees.length] = hex;
+              //say('will make a tree at ' + hex.x + ',' + hex.y);
+            }
+          }
+        }
+        c = $c("a");
+        if (trees.length > 0) {
+          for (x = 0; x < trees.length; x = x + 1) {
+            trees[x].holding = new Tree();
+            trees[x].draw(c);
+            //say('draw the tree at ' + hex.x + ',' + hex.y);
+          }
+        }
+      }
 
-function findKingdoms() {
-    kingdoms = new Hash();
-    //first, clear all kingdoms.
-	for (x = 0; x < MAX_X; x = x + 1) {
-        for (y = 0; y < MAX_Y; y = y + 1) {
+      function findKingdoms() {
+        kingdoms = new Hash();
+        //first, clear all kingdoms.
+        for (x = 0; x < MAX_X; x = x + 1) {
+          for (y = 0; y < MAX_Y; y = y + 1) {
             hex = hexes[x][y];
             if (hex.kingdom != undefined) {
-			  hex.kingdom = null;
-			}
-		}
-	}
-	currentKingdom = null;
-	
-    var c, hex, x, y, neighbors, newKingdom, point, k, h, oldKingdom1, oldKingdom2;
-    c = $c("a");
-    for (x = 0; x < MAX_X; x = x + 1) {
-        for (y = 0; y < MAX_Y; y = y + 1) {
+              hex.kingdom = null;
+            }
+          }
+        }
+        currentKingdom = null;
+
+        var c,
+          hex,
+          x,
+          y,
+          neighbors,
+          newKingdom,
+          point,
+          k,
+          h,
+          oldKingdom1,
+          oldKingdom2;
+        c = $c("a");
+        for (x = 0; x < MAX_X; x = x + 1) {
+          for (y = 0; y < MAX_Y; y = y + 1) {
             hex = hexes[x][y];
             if (hex.kingdom == undefined) {
-                //Doesn't have a kingdom?
-                //Give it a kingdom that
-                //contains only itself.
-                hex.kingdom = new Kingdom(); 
-                hex.kingdom.hexes[0] = hex;
-                kingdoms.setItem(hex.kingdom.name(), hex.kingdom);
+              //Doesn't have a kingdom?
+              //Give it a kingdom that
+              //contains only itself.
+              hex.kingdom = new Kingdom();
+              hex.kingdom.hexes[0] = hex;
+              kingdoms.setItem(hex.kingdom.name(), hex.kingdom);
             } else {
-                kingdoms.setItem(hex.kingdom.name(), hex.kingdom);
+              kingdoms.setItem(hex.kingdom.name(), hex.kingdom);
             }
             neighbors = getNeighbors(x, y);
             for (k = 0; k < 6; k = k + 1) {
-                if (neighbors[k] != undefined) {
-                    if (neighbors[k].kingdom == undefined) {
-                        //Doesn't have a kingdom? Give it a kingdom that contains only itself.
-                        neighbors[k].kingdom = new Kingdom(); 
-                        neighbors[k].kingdom.hexes[0] = neighbors[k];
-                        kingdoms.setItem(neighbors[k].kingdom.name(), neighbors[k].kingdom);
-                    }
+              if (neighbors[k] != undefined) {
+                if (neighbors[k].kingdom == undefined) {
+                  //Doesn't have a kingdom? Give it a kingdom that contains only itself.
+                  neighbors[k].kingdom = new Kingdom();
+                  neighbors[k].kingdom.hexes[0] = neighbors[k];
+                  kingdoms.setItem(
+                    neighbors[k].kingdom.name(),
+                    neighbors[k].kingdom
+                  );
+                }
+              }
+
+              //if my neighbor and i are on the same team, but our kingdoms are not yet merged...
+              if (
+                neighbors[k] != undefined &&
+                neighbors[k].team === hex.team &&
+                neighbors[k].kingdom !== hex.kingdom
+              ) {
+                kingdoms.removeItem(neighbors[k].kingdom.name());
+                kingdoms.removeItem(hex.kingdom.name());
+                newKingdom = new Kingdom();
+                //form a new kingdom out of my kingdom and my neighbor's kingdom.
+                oldKingdom1 = hex.kingdom;
+                oldKingdom2 = neighbors[k].kingdom;
+                newKingdom.hexes = hex.kingdom.hexes.concat(
+                  neighbors[k].kingdom.hexes
+                );
+                //and tell every hex in the kingdom that they now belong to this kingdom.
+                for (h = 0; h < newKingdom.hexes.length; h = h + 1) {
+                  newKingdom.hexes[h].kingdom = newKingdom;
+                  if (newKingdom.hexes[h].hasVillage()) {
+                    newKingdom.hexes[h].holding = null;
+                  }
                 }
 
-                //if my neighbour and i are on the same team, but our kingdoms are not yet merged...
-                if (neighbors[k] != undefined && neighbors[k].team === hex.team && neighbors[k].kingdom !== hex.kingdom) {
-                    kingdoms.removeItem(neighbors[k].kingdom.name());
-                    kingdoms.removeItem(hex.kingdom.name());
-                    newKingdom = new Kingdom();
-                    //form a new kingdom out of my kingdom and my neighbor's kingdom.
-					oldKingdom1 = hex.kingdom;
-					oldKingdom2 = neighbors[k].kingdom;
-					newKingdom.hexes = hex.kingdom.hexes.concat(neighbors[k].kingdom.hexes);
-                    //and tell every hex in the kingdom that they now belong to this kingdom.
-                    for (h = 0; h < newKingdom.hexes.length; h = h + 1) {
-                        newKingdom.hexes[h].kingdom = newKingdom;
-                        if (newKingdom.hexes[h].hasVillage()) { 
-						    newKingdom.hexes[h].holding = null;
-						}
-                    }
-					
-                    //TODO: if they both had a village, then the new village is the village of 
-                    //whichever is bigger. instead of just...
-					if (newKingdom.hexes.length > 0) {
-					  newKingdom.assignVillage(oldKingdom1, oldKingdom2);
-                      //newKingdom.village = newKingdom.hexes[0];
-                      //newKingdom.hexes[0].hasVillage = true;
-					}
-					var zx;
-					if (newKingdom.name() == undefined) {
-					     zx++;
-					}
-                    kingdoms.setItem(newKingdom.name(), newKingdom);
+                //TODO: if they both had a village, then the new village is the village of
+                //whichever is bigger. instead of just...
+                if (newKingdom.hexes.length > 0) {
+                  newKingdom.assignVillage(oldKingdom1, oldKingdom2);
+                  //newKingdom.village = newKingdom.hexes[0];
+                  //newKingdom.hexes[0].hasVillage = true;
                 }
+                var zx;
+                if (newKingdom.name() == undefined) {
+                  zx++;
+                }
+                kingdoms.setItem(newKingdom.name(), newKingdom);
+              }
             }
+          }
         }
-    }
-}
+      }
 
-function pickIndex(len) {
-    return Math.floor((Math.random() * len))
-}
+      function pickIndex(len) {
+        return Math.floor(Math.random() * len);
+      }
 
-//returns an item *without* diminishing the array (see also takeOne() in YAbizplan.html)
-function takeOne(fromArray) {
-    var i = pickIndex(fromArray.length);
-    var result = fromArray[i];
-    return result;
-}
+      //returns an item *without* diminishing the array (see also takeOne() in YAbizplan.html)
+      function takeOne(fromArray) {
+        var i = pickIndex(fromArray.length);
+        var result = fromArray[i];
+        return result;
+      }
 
-function clickHex(z) {
-    var c, colr, hex, point, k, message;
-    c = $c("a");
-    hex = hexes[z[0]][z[1]];
-    //if we're holding something....
-	//say(' clicked ' + z);
-    if (hand.holding() != null && currentKingdom != null) {
-        if (hex.team == currentTeam && hex.kingdom == currentKingdom) {
+      function clickHex(z) {
+        var c, colr, hex, point, k, message;
+        c = $c("a");
+        hex = hexes[z[0]][z[1]];
+        //if we're holding something....
+        //say(' clicked ' + z);
+        if (hand.holding() != null && currentKingdom != null) {
+          if (hex.team == currentTeam && hex.kingdom == currentKingdom) {
             //clicked a square within the current kingdom...
             message = hand.putDown(hex);
             if (message != null) {
-                say(message);
-                return;
+              say(message);
+              return;
             }
             updateTargets(c);
             hex.draw(c);
             showHolding();
             return;
-        } else if (hex.team != undefined && hex.team != currentTeam && targets != undefined && targets.length != 0) {
+          } else if (
+            hex.team != undefined &&
+            hex.team != currentTeam &&
+            targets != undefined &&
+            targets.length != 0
+          ) {
             //did we just click on a target hex? if so we'll place it there.
             for (k = 0; k < targets.length; k = k + 1) {
-                if (targets[k] == hex) {
-                    claim(hex, c);
-                    //no need to look at the rest of the targets...          
-					return;
-                    //break;
-                }
+              if (targets[k] == hex) {
+                claim(hex, c);
+                //no need to look at the rest of the targets...
+                return;
+                //break;
+              }
             }
+          }
         }
-		
-    }
 
-    if (hand.holding() == null && currentKingdom != null  && hex.kingdom != undefined && currentKingdom == hex.kingdom && hex.holding != null && hex.holding.moved == false) {
-        //pick up what we've clicked on.
-		if (!hand.pickup(hex.holding, hex)) {
-			say('Oops, can\'t pick it up.');
-			return false;
-		};
-		hex.holding = null;
-		if (currentTeam == 0) {
-			showHolding();
-		} else {
-			say('got it.');
-		}
+        if (
+          hand.holding() == null &&
+          currentKingdom != null &&
+          hex.kingdom != undefined &&
+          currentKingdom == hex.kingdom &&
+          hex.holding != null &&
+          hex.holding.moved == false
+        ) {
+          //pick up what we've clicked on.
+          if (!hand.pickup(hex.holding, hex)) {
+            say("Oops, can't pick it up.");
+            return false;
+          }
+          hex.holding = null;
+          if (currentTeam == 0) {
+            showHolding();
+          } else {
+            say("got it.");
+          }
 
-		updateTargets();
-		hex.draw(c);
-		
-		return true;
-	}
-	
-	//clicked on a different kingdom
-    if (hex.team === currentTeam && hex.kingdom != undefined && hex.kingdom.hexes.length > 1) {
-        //stop highlighting the previous current kingdom    
-        hand.drop();
-        updateTargets(c);
-        showHolding();
+          updateTargets();
+          hex.draw(c);
+
+          return true;
+        }
+
+        //clicked on a different kingdom
+        if (
+          hex.team === currentTeam &&
+          hex.kingdom != undefined &&
+          hex.kingdom.hexes.length > 1
+        ) {
+          //stop highlighting the previous current kingdom
+          hand.drop();
+          updateTargets(c);
+          showHolding();
+          unHighlight(c, currentKingdom);
+          currentKingdom = hex.kingdom;
+          //highlight the 'new' currentKingdom
+          highlight(c, currentKingdom, hex);
+        }
+      }
+
+      function clicked(x, y) {
+        var z;
+        z = xyToColumnRow(x, y);
+        clickHex(z);
+      }
+
+      function claim(hex, c) {
+        //claim the selected hex as part of the current kingdom.
+
+        if (c == undefined) {
+          c = $c("a");
+        }
+        var clickedTeam,
+          j,
+          newKingdom,
+          neighbors,
+          h,
+          clickedKingdom,
+          message,
+          haveFoundOldKingdom,
+          oldKingdom1,
+          oldKingdom2;
+
+        clickedTeam = hex.team;
+        clickedKingdom = hex.kingdom;
+
         unHighlight(c, currentKingdom);
-        currentKingdom = hex.kingdom;
-        //highlight the 'new' currentKingdom
-        highlight(c, currentKingdom, hex);
-    }
-}
 
-function clicked(x, y) {
-    var z;
-    z = xyToColumnRow(x, y);
-    clickHex(z);
-}
+        //kill the old kingdom to which the clicked piece belonged...
+        //(the kingdom may be re-formed later, reduced or in pieces)
+        //(note the money and profit from that kingdom may later be restored
+        //to the kingdom of one of its former neighbors)
+        kingdoms.removeItem(clickedKingdom.name());
 
-function claim(hex, c) {
-    //claim the selected hex as part of the current kingdom.
-	
-    if (c == undefined) {
-        c = $c("a");
-    }
-    var clickedTeam, j, newKingdom, neighbors, h, clickedKingdom, message, haveFoundOldKingdom, oldKingdom1, oldKingdom2;
+        //the hex we're claiming is conquered. Any occupants are killed.
+        hex.holding = null;
 
-    clickedTeam = hex.team;
-    clickedKingdom = hex.kingdom;
-	
-    unHighlight(c, currentKingdom);
+        //the hex we clicked is now part of the current kingdom
+        currentKingdom.hexes[currentKingdom.hexes.length] = hex;
+        hex.team = currentTeam;
+        hex.kingdom = currentKingdom;
 
-    
-	//kill the old kingdom to which the clicked piece belonged...
-	//(the kingdom may be re-formed later, reduced or in pieces)
-	//(note the money and profit from that kingdom may later be restored 
-	//to the kingdom of one of its former neighbours)
-    kingdoms.removeItem(clickedKingdom.name()); 
-    
-	//the hex we're claiming is conquered. Any occupants are killed.
-	hex.holding = null;
-	
-	//the hex we clicked is now part of the current kingdom
-    currentKingdom.hexes[currentKingdom.hexes.length] = hex;
-	hex.team = currentTeam;
-    hex.kingdom = currentKingdom;
-	
-	//whatever we were holding is now held by the hex we clicked.
-	message = hand.putDown(hex);
-    if (message != null) {
-        say(message);
-        return;
-    }
-	hex.holding.moved = true; //because it claimed a new hex, its turn is now done.
+        //whatever we were holding is now held by the hex we clicked.
+        message = hand.putDown(hex);
+        if (message != null) {
+          say(message);
+          return;
+        }
+        hex.holding.moved = true; //because it claimed a new hex, its turn is now done.
 
-    showHolding();
-	
-    hex.draw(c);
+        showHolding();
 
-    //we may have just caused two kingdoms to join up... check and join as needed.
-    //and we may have just split up or reduced someone else's kingdom
-    neighbors = getNeighbors(hex.x, hex.y);
-	
-	
-	haveFoundOldKingdom = false;
-    for (j = 0; j < neighbors.length; j = j + 1) {
-        if (clickedTeam != -1 && clickedTeam != currentTeam && neighbors[j].team == clickedTeam && neighbors[j].kingdom == clickedKingdom) {
-		    //note the clause 'neighbors[j].kingdom == clickedKingdom' looks redundant, but is there to ensure
-			//we're only re-thinking the clicked kingdom, and not kingdoms that have already been rethunk.
-  	
-            //we've just reduced that kingdom by at least 1 hex... 
+        hex.draw(c);
+
+        //we may have just caused two kingdoms to join up... check and join as needed.
+        //and we may have just split up or reduced someone else's kingdom
+        neighbors = getNeighbors(hex.x, hex.y);
+
+        haveFoundOldKingdom = false;
+        for (j = 0; j < neighbors.length; j = j + 1) {
+          if (
+            clickedTeam != -1 &&
+            clickedTeam != currentTeam &&
+            neighbors[j].team == clickedTeam &&
+            neighbors[j].kingdom == clickedKingdom
+          ) {
+            //note the clause 'neighbors[j].kingdom == clickedKingdom' looks redundant, but is there to ensure
+            //we're only re-thinking the clicked kingdom, and not kingdoms that have already been rethunk.
+
+            //we've just reduced that kingdom by at least 1 hex...
             //possibly we've split it in 2 or three pieces.
             newKingdom = new Kingdom();
             neighbors[j].kingdom = newKingdom;
-			newKingdom.hexes[newKingdom.hexes.length] = neighbors[j];
-			kingdoms.setItem(neighbors[j].kingdom.name(), neighbors[j].kingdom);
-			
-			if (!haveFoundOldKingdom) {
-			  //any money residing in the old kingdom of the clicked hex
-			  //is given to the new kingdom of the first found former member of the old kingdom			  
-			  newKingdom.money  = clickedKingdom.money;
-			  newKingdom.profit = clickedKingdom.profit;
-			  haveFoundOldKingdom = true;
-			}
-			
-            rethinkKingdom(neighbors[j]);
+            newKingdom.hexes[newKingdom.hexes.length] = neighbors[j];
+            kingdoms.setItem(neighbors[j].kingdom.name(), neighbors[j].kingdom);
 
-        } else if (neighbors[j].team == currentTeam && neighbors[j].kingdom != currentKingdom) {
+            if (!haveFoundOldKingdom) {
+              //any money residing in the old kingdom of the clicked hex
+              //is given to the new kingdom of the first found former member of the old kingdom
+              newKingdom.money = clickedKingdom.money;
+              newKingdom.profit = clickedKingdom.profit;
+              haveFoundOldKingdom = true;
+            }
+
+            rethinkKingdom(neighbors[j]);
+          } else if (
+            neighbors[j].team == currentTeam &&
+            neighbors[j].kingdom != currentKingdom
+          ) {
             //Join them up!
-			
-			oldKingdom1 = currentKingdom;
-			oldKingdom2 = neighbors[j].kingdom;
-			
+
+            oldKingdom1 = currentKingdom;
+            oldKingdom2 = neighbors[j].kingdom;
+
             newKingdom = new Kingdom();
             //form a new kingdom out of my kingdom and my neighbor's kingdom.
-            newKingdom.hexes = currentKingdom.hexes.concat(neighbors[j].kingdom.hexes);
-            newKingdom.money = currentKingdom.money + neighbors[j].kingdom.money;
-            newKingdom.profit = currentKingdom.profit + neighbors[j].kingdom.profit;
+            newKingdom.hexes = currentKingdom.hexes.concat(
+              neighbors[j].kingdom.hexes
+            );
+            newKingdom.money =
+              currentKingdom.money + neighbors[j].kingdom.money;
+            newKingdom.profit =
+              currentKingdom.profit + neighbors[j].kingdom.profit;
 
             //remove each old kingdom from the list of kingdoms.
             kingdoms.removeItem(currentKingdom.name());
@@ -882,11 +1055,11 @@ function claim(hex, c) {
 
             //and tell every hex in the kingdom that they now belong to this kingdom.
             for (h = 0; h < newKingdom.hexes.length; h = h + 1) {
-                newKingdom.hexes[h].kingdom = newKingdom;
-                if (newKingdom.hexes[h].hasVillage()) {
-				  newKingdom.hexes[h].holding = null;
-				}
-                newKingdom.hexes[h].draw(c);
+              newKingdom.hexes[h].kingdom = newKingdom;
+              if (newKingdom.hexes[h].hasVillage()) {
+                newKingdom.hexes[h].holding = null;
+              }
+              newKingdom.hexes[h].draw(c);
             }
 
             //TODO: if they both had a village, then the new village is the village of whichever is bigger.
@@ -894,454 +1067,531 @@ function claim(hex, c) {
             //newKingdom.village = newKingdom.hexes[0];
             //newKingdom.hexes[0].hasVillage = true;
             //newKingdom.hexes[0].draw(c); //draw the one with the village...
-			
-			if (newKingdom.hexes.length > 0) {
-			  newKingdom.assignVillage(oldKingdom1, oldKingdom2);
-			  newKingdom.village.draw(c); //draw the one with the village...
+
+            if (newKingdom.hexes.length > 0) {
+              newKingdom.assignVillage(oldKingdom1, oldKingdom2);
+              newKingdom.village.draw(c); //draw the one with the village...
             }
-			
+
             showKingdom(currentKingdom);
+          }
         }
-    }
-	
-	updateTargets(c);
-    //no need to look at the rest of the targets...
 
-	
-	//unHighlight(c, currentKingdom);
-    //currentKingdom = hex.kingdom;
-    //highlight the 'new' currentKingdom
-    highlight(c, currentKingdom, hex);
-	
-}
+        updateTargets(c);
+        //no need to look at the rest of the targets...
 
-function rethinkKingdom(hex) {
-    var neighbors, neighbor, j;
-    neighbors = getNeighbors(hex.x, hex.y);
-    for (j = 0; j < neighbors.length; j = j + 1) {
-        neighbor = neighbors[j];
-        if (neighbor.team != undefined && neighbor.team == hex.team && neighbor.kingdom != hex.kingdom) {
+        //unHighlight(c, currentKingdom);
+        //currentKingdom = hex.kingdom;
+        //highlight the 'new' currentKingdom
+        highlight(c, currentKingdom, hex);
+      }
+
+      function rethinkKingdom(hex) {
+        var neighbors, neighbor, j;
+        neighbors = getNeighbors(hex.x, hex.y);
+        for (j = 0; j < neighbors.length; j = j + 1) {
+          neighbor = neighbors[j];
+          if (
+            neighbor.team != undefined &&
+            neighbor.team == hex.team &&
+            neighbor.kingdom != hex.kingdom
+          ) {
             kingdoms.removeItem(neighbor.kingdom.name()); //if we can
             neighbor.kingdom = hex.kingdom;
-			neighbor.kingdom.hexes[neighbor.kingdom.hexes.length] = neighbor;//hex;
-			rethinkKingdom(neighbor);
+            neighbor.kingdom.hexes[neighbor.kingdom.hexes.length] = neighbor; //hex;
+            rethinkKingdom(neighbor);
+          }
         }
-    }
-}
+      }
 
-function updateTargets(c) {
-    if (c == undefined) {
-        c = $c("a");
-    }
-    unhighlightTargets(c);
-    targets = [];
+      function updateTargets(c) {
+        if (c == undefined) {
+          c = $c("a");
+        }
+        unHighlightTargets(c);
+        targets = [];
 
-    findTargets();
-    highlightTargets(c);
-}
+        findTargets();
+        highlightTargets(c);
+      }
 
-function highlight(c, currentKingdom, hex) {
-    var h, point, colors, neighbors;
-    for (h = 0; h < currentKingdom.hexes.length; h = h + 1) {
-        point = columnRowToXY(currentKingdom.hexes[h].x, currentKingdom.hexes[h].y);
-        neighbors = getNeighbors(currentKingdom.hexes[h].x, currentKingdom.hexes[h].y)
-        colors = [];
-        for (i = 0; i < neighbors.length; i = i + 1) {
-            if (neighbors[i] != null && neighbors[i].team === hex.team) { //currentKingdom  neighbors[i].kingdom === currentKingdom) {
-			    if (neighbors[i].kingdom.name() != currentKingdom.name()) {
-				  say('wrong kingdom: ' + neighbors[i]);
-				}
-                colors[i] = "transparent"; //turfColors[currentTeam];
+      function highlight(c, currentKingdom, hex) {
+        var h, point, colors, neighbors;
+        for (h = 0; h < currentKingdom.hexes.length; h = h + 1) {
+          point = columnRowToXY(
+            currentKingdom.hexes[h].x,
+            currentKingdom.hexes[h].y
+          );
+          neighbors = getNeighbors(
+            currentKingdom.hexes[h].x,
+            currentKingdom.hexes[h].y
+          );
+          colors = [];
+          for (i = 0; i < neighbors.length; i = i + 1) {
+            if (neighbors[i] != null && neighbors[i].team === hex.team) {
+              //currentKingdom  neighbors[i].kingdom === currentKingdom) {
+              if (neighbors[i].kingdom.name() != currentKingdom.name()) {
+                say("wrong kingdom: " + neighbors[i]);
+              }
+              colors[i] = "transparent"; //turfColors[currentTeam];
             } else {
-			
-			    if (neighbors[i].team == hex.team) {
-				  say('wrong team: '+ neighbors[i]);
-				}
-                colors[i] = "#FFF";
+              if (neighbors[i].team == hex.team) {
+                say("wrong team: " + neighbors[i]);
+              }
+              colors[i] = "#FFF";
             }
+          }
+          currentKingdom.hexes[h].highlightColors = colors;
+          currentKingdom.hexes[h].draw(c);
         }
-        currentKingdom.hexes[h].highlightColors = colors;
-        currentKingdom.hexes[h].draw(c);
-    }
-    showKingdom(currentKingdom);
-}
+        showKingdom(currentKingdom);
+      }
 
-function showKingdom(kingdom) {
-    if (kingdom == undefined) {
-        $('kingdom').innerHTML = "";
-    } else {
-        $('kingdom').innerHTML = "profit:" + kingdom.profit + " gold: " + kingdom.money + "<br />" + " size: " + kingdom.hexes.length + "<br /><input type='button' value='peasant' id='peasant' onclick='tryBuyPeasant();' />";
-        //TODO: castles....    <input type='button' value='castle' id='castle' onclick='tryBuyCastle();' />";
-    }
-}
+      function showKingdom(kingdom) {
+        if (kingdom == undefined) {
+          $("kingdom").innerHTML = "";
+        } else {
+          $("kingdom").innerHTML =
+            "profit:" +
+            kingdom.profit +
+            " gold: " +
+            kingdom.money +
+            "<br />" +
+            " size: " +
+            kingdom.hexes.length +
+            "<br /><input type='button' value='peasant' id='peasant' onclick='tryBuyPeasant();' />";
+          //TODO: castles....    <input type='button' value='castle' id='castle' onclick='tryBuyCastle();' />";
+        }
+      }
 
-var lastElement;
+      var lastElement;
 
-function say(message) {
-    var newElement = document.createElement('p');
-    newElement.innerHTML = message + "<br />";
-    if (lastElement == undefined) {
-        lastElement = $('message');
-    }
-    var scr = lastElement; //$(id);  
-    lastElement.parentNode.insertBefore(newElement, scr);
-    lastElement = newElement;
-}
+      function say(message) {
+        var newElement = document.createElement("p");
+        newElement.innerHTML = message + "<br />";
+        if (lastElement == undefined) {
+          lastElement = $("message");
+        }
+        var scr = lastElement; //$(id);
+        lastElement.parentNode.insertBefore(newElement, scr);
+        lastElement = newElement;
+      }
 
-var el2;
-function showColors() {
- var i;
- for(i = 0; i < turfColors.length; i = i + 1) {
-    var newElement = document.createElement('p');
-    newElement.innerHTML = "<span style='background-color:" + turfColors[i] + "'>Team " + i + "</span>";
-    if (el2 == undefined) {
-        el2 = $('teamColors');
-    }
-     var scr = el2; //$(id);  
-     el2.parentNode.insertBefore(newElement, scr);
-     el2 = newElement;
-	}
-}
+      var el2;
+      function showColors() {
+        var i;
+        for (i = 0; i < turfColors.length; i = i + 1) {
+          var newElement = document.createElement("p");
+          newElement.innerHTML =
+            "<span style='background-color:" +
+            turfColors[i] +
+            "'>Team " +
+            i +
+            "</span>";
+          if (el2 == undefined) {
+            el2 = $("teamColors");
+          }
+          var scr = el2; //$(id);
+          el2.parentNode.insertBefore(newElement, scr);
+          el2 = newElement;
+        }
+      }
 
+      function tryBuyPeasant() {
+        if (currentKingdom == undefined) {
+          say("pick a kingdom first");
+          return false;
+        }
+        var man = new Man();
 
-function tryBuyPeasant() {
-    if (currentKingdom == undefined) {
-        say('pick a kingdom first');
-        return false;
-    }
-    var man = new Man();
+        if (currentKingdom.money < man.price()) {
+          say("Need to have at least " + man.price() + " gold pieces");
+          return false;
+        }
 
-    if (currentKingdom.money < man.price()) {
-        say('Need to have at least ' + man.price() + ' gold pieces');
-        return false;
-    }
+        if (!hand.pickup(man, currentKingdom)) {
+          say("Oops, can't pick it up.");
+          return false;
+        }
+        if (currentTeam == 0) {
+          showHolding();
+        } else {
+          //say('bought it.');
+        }
 
-    if (!hand.pickup(man, currentKingdom)) {
-        say('Oops, can\'t pick it up.');
-		return false;
-    };
-	if (currentTeam == 0) {
-      showHolding();
-	} else {
-	  //say('bought it.');
-	}
+        updateTargets();
+        return true;
+      }
 
-    updateTargets();
-	return true;
-}
+      //TODO:function tryBuyCastle() {
+      //
+      //}
 
-//TODO:function tryBuyCastle() { 
-//  
-//}
+      function showHolding() {
+        var holdingDiv, description;
+        holdingDiv = $("holding");
+        if (hand.level() == 0) {
+          description = "Holding nothing";
+        } else {
+          description = "Holding a " + manTypes[hand.level() - 1];
+        }
+        holdingDiv.innerHTML = description;
 
-function showHolding() {
-    var holdingDiv, description;
-    holdingDiv = $('holding');
-    if (hand.level() == 0) {
-        description = "Holding nothing";
-    }
-    else {
-        description = "Holding a " + manTypes[hand.level() - 1];
-    }
-    holdingDiv.innerHTML = description;
+        return;
+      }
 
-    return;
-}
+      function highlightTargets(c) {
+        var k, point, hex;
+        if (c == undefined) {
+          c = $c("a");
+        }
+        for (k = 0; k < targets.length; k = k + 1) {
+          hex = targets[k];
+          point = columnRowToXY(hex.x, hex.y);
+          drawHexBorder(c, point[0], point[1], redBorders);
+        }
+      }
 
-function highlightTargets(c) {
-    var k, point, hex;
-    if (c == undefined) {
-        c = $c("a");
-    }
-    for (k = 0; k < targets.length; k = k + 1) {
-        hex = targets[k];
-        point = columnRowToXY(hex.x, hex.y);
-        drawHexBorder(c, point[0], point[1], redBorders);
-    }
-}
+      function unHighlightTargets(c) {
+        if (targets == undefined || targets.length == undefined) return;
+        var k, point, hex;
+        for (k = 0; k < targets.length; k = k + 1) {
+          hex = targets[k];
+          hex.highlightColors = null;
+          hex.draw(c);
+        }
+      }
 
-function unhighlightTargets(c) {
-    if (targets == undefined || targets.length == undefined) return;
-    var k, point, hex;
-    for (k = 0; k < targets.length; k = k + 1) {
-        hex = targets[k];
-        hex.highlightColors = null;
-        hex.draw(c);
-    }
-}
+      function findTargets() {
+        if (hand.holding() == null) return;
+        if (currentKingdom == null) return;
 
-function findTargets() {
-
-    if (hand.holding() == null) return;
-    if (currentKingdom == null) return;
-
-    var hex, point, neighbors, h, k;
-    if (hand.holding().constructor.name == "Man") {
-        for (h in currentKingdom.hexes) {
+        var hex, point, neighbors, h, k;
+        if (hand.holding().constructor.name == "Man") {
+          for (h in currentKingdom.hexes) {
             hex = currentKingdom.hexes[h];
             neighbors = getNeighbors(hex.x, hex.y);
             for (k = 0; k < 6; k = k + 1) {
-                //no point highlighting your own land. or water.
-                if (neighbors[k] != undefined && neighbors[k].team != undefined && neighbors[k].team != hex.team) {
-                    //can't highlight land that's defended by someone equal or stronger than us
-                    if (!canWithstand(neighbors[k], hand.holding())) {
-                        targets[targets.length] = neighbors[k];
-                    }
+              //no point highlighting your own land. or water.
+              if (
+                neighbors[k] != undefined &&
+                neighbors[k].team != undefined &&
+                neighbors[k].team != hex.team
+              ) {
+                //can't highlight land that's defended by someone equal or stronger than us
+                if (!canWithstand(neighbors[k], hand.holding())) {
+                  targets[targets.length] = neighbors[k];
                 }
+              }
             }
+          }
         }
-    }
-}
+      }
 
-function canWithstand(hex, holding) {
-    //can the given hex withstand an attack from what is being held?
-    //(hex is an enemy's hex)
-    var neighbors, k;
+      function canWithstand(hex, holding) {
+        //can the given hex withstand an attack from what is being held?
+        //(hex is an enemy's hex)
+        var neighbors, k;
 
-    if (hex.hasVillage() && holding.level <= 1) return true;
-    if (holding == undefined) return true;
-    if (hex.holding != undefined && hex.holding.constructor.name == "Man") { // && hex.holding.level < holding.level)  {
-        if (hex.holding.level >= holding.level) return true;
-    }
-    neighbors = getNeighbors(hex.x, hex.y);
-    for (k = 0; k < neighbors.length; k = k + 1) {
-        //is the hex defended by a powerful neighbor?        
-        if (neighbors[k] != undefined && neighbors[k].team != undefined && neighbors[k].team == hex.team) {
+        if (hex.hasVillage() && holding.level <= 1) return true;
+        if (holding == undefined) return true;
+        if (hex.holding != undefined && hex.holding.constructor.name == "Man") {
+          // && hex.holding.level < holding.level)  {
+          if (hex.holding.level >= holding.level) return true;
+        }
+        neighbors = getNeighbors(hex.x, hex.y);
+        for (k = 0; k < neighbors.length; k = k + 1) {
+          //is the hex defended by a powerful neighbor?
+          if (
+            neighbors[k] != undefined &&
+            neighbors[k].team != undefined &&
+            neighbors[k].team == hex.team
+          ) {
             if (neighbors[k].hasVillage() && holding.level <= 1) return true;
             if (neighbors[k].holding == undefined) continue;
             if (neighbors[k].holding.level >= holding.level) return true;
+          }
         }
-    }
-    return false;
-}
+        return false;
+      }
 
-function unHighlight(c, currentKingdom) {
-    if (currentKingdom == null) return;
-    var h, point;
-    //unmark the previous 'currentKingdom'
-    for (h = 0; h < currentKingdom.hexes.length; h = h + 1) {
-        currentKingdom.hexes[h].highlightColors = null;
-        currentKingdom.hexes[h].draw(c);
-    }
-    showKingdom();
-}
+      function unHighlight(c, currentKingdom) {
+        if (currentKingdom == null) return;
+        var h, point;
+        //unMark the previous 'currentKingdom'
+        for (h = 0; h < currentKingdom.hexes.length; h = h + 1) {
+          currentKingdom.hexes[h].highlightColors = null;
+          currentKingdom.hexes[h].draw(c);
+        }
+        showKingdom();
+      }
 
-var r = ["4", "A", "5", "9", "6", "8", "7", "F", "0", "E", "1", "D", "2", "C", "3", "B"];
-var g = ["E", "1", "D", "2", "C", "3", "B", "4", "A", "5", "9", "6", "8", "F", "0", "7"];
-var b = ["F", "0", "E", "1", "D", "2", "C", "3", "B", "4", "A", "5", "9", "6", "8", "7"];
+      var r = [
+        "4",
+        "A",
+        "5",
+        "9",
+        "6",
+        "8",
+        "7",
+        "F",
+        "0",
+        "E",
+        "1",
+        "D",
+        "2",
+        "C",
+        "3",
+        "B",
+      ];
+      var g = [
+        "E",
+        "1",
+        "D",
+        "2",
+        "C",
+        "3",
+        "B",
+        "4",
+        "A",
+        "5",
+        "9",
+        "6",
+        "8",
+        "F",
+        "0",
+        "7",
+      ];
+      var b = [
+        "F",
+        "0",
+        "E",
+        "1",
+        "D",
+        "2",
+        "C",
+        "3",
+        "B",
+        "4",
+        "A",
+        "5",
+        "9",
+        "6",
+        "8",
+        "7",
+      ];
 
-function funnyColor(x, y) {
-    return "#" + r[(x + y) % 16] + g[x % 16] + b[y % 16]
-}
+      function funnyColor(x, y) {
+        return "#" + r[(x + y) % 16] + g[x % 16] + b[y % 16];
+      }
 
-function drawDot(c, x, y, col) {
-    c.moveTo(x - 1, y - 1);
-    c.fillStyle = col;
-    c.fillRect(x - 1, y - 1, 3, 3);
-}
-//var sx;
-//sx = 0;
-function endTurn() {
-    hand.drop();
-    var newHexes, c, t, king, targetHex, message, hex;
-    c = $c("a");
-    //unHighlight(c, currentKingdom);
-    //give each team a go...
-    for (t=1; t < turfColors.length; t = t + 1) {
-	    unHighlight(c, currentKingdom);
-	    currentTeam = t;
+      function drawDot(c, x, y, col) {
+        c.moveTo(x - 1, y - 1);
+        c.fillStyle = col;
+        c.fillRect(x - 1, y - 1, 3, 3);
+      }
+      //var sx;
+      //sx = 0;
+      function endTurn() {
+        hand.drop();
+        var newHexes, c, t, king, targetHex, message, hex;
+        c = $c("a");
+        //unHighlight(c, currentKingdom);
+        //give each team a go...
+        for (t = 1; t < turfColors.length; t = t + 1) {
+          unHighlight(c, currentKingdom);
+          currentTeam = t;
 
-		//first turn is free... after that profit and loss occurs...
-		if (turn > 0) { 
-		  calculateProfit(t);
-		}
-	
-	    //complete the move of all players on the previous team.
-		setMoved(c, currentTeam - 1, true);
-		
-		//give players on this team a fresh chance to be moved.
-		setMoved(c, currentTeam, false);
-		
-		AIMoveTeam(c, currentTeam);
-		            
-    }
-	
-	setMoved(c, currentTeam, true);	
-	makeTrees();
-	currentTeam = 0;
-	//give players on this team a fresh chance to be moved
-	turn = turn + 1;
-    calculateProfit(0);
-	setMoved(c, currentTeam, false);
-	say('Your turn');
-}
+          //first turn is free... after that profit and loss occurs...
+          if (turn > 0) {
+            calculateProfit(t);
+          }
 
+          //complete the move of all players on the previous team.
+          setMoved(c, currentTeam - 1, true);
 
-function AIMoveTeam(c, currentTeam) {
-    var teamCanMove = true;
-	
-    while (teamCanMove) {
-        teamCanMove = false;            
-        for (kingdomID in kingdoms.items) {	
-		    king = kingdoms.items[kingdomID];
+          //give players on this team a fresh chance to be moved.
+          setMoved(c, currentTeam, false);
+
+          AIMoveTeam(c, currentTeam);
+        }
+
+        setMoved(c, currentTeam, true);
+        makeTrees();
+        currentTeam = 0;
+        //give players on this team a fresh chance to be moved
+        turn = turn + 1;
+        calculateProfit(0);
+        setMoved(c, currentTeam, false);
+        say("Your turn");
+      }
+
+      function AIMoveTeam(c, currentTeam) {
+        var teamCanMove = true;
+
+        while (teamCanMove) {
+          teamCanMove = false;
+          for (kingdomID in kingdoms.items) {
+            king = kingdoms.items[kingdomID];
             if (king.team() == currentTeam) {
-				unHighlight(c, currentKingdom); 
-                currentKingdom = king;
-					
-				for (hexId in currentKingdom.hexes) {
-				    hex = currentKingdom.hexes[hexId];
-					if (hex.holding != null && hex.holding.constructor.name == "Man" && hex.moved == false) {
-					    if (hand.pickup(hex.holding, hex)) {
-                            hex.holding = null;
-		                    updateTargets();
-						    if (targets.length > 0) {
-						        teamCanMove = true;
-								//select a target location at random
-                                targetHex = takeOne(targets);
-							    //put what we picked up onto the targethex
-							    claim(targetHex, c);
-							    break;
-					        } 
-				        }
-			        }
-			    }
-				
-				//todo: don't buy peasant just cause we can!!
-				//only buy if... you can sustain...
-				
-			    while (currentKingdom.money >= 10 && tryBuyPeasant()) {
-			        //'try buy peasant' calls 'update Targets' itself...;				
-				    if (targets.length > 0) {
-				        teamCanMove = true;
-                        //select a target location at random
-                        targetHex = takeOne(targets);
-					    //put what we bought on the targethex
-					    claim(targetHex, c);
-		   	    	    break;
-				   }
-		        }
-		        hand.drop();
+              unHighlight(c, currentKingdom);
+              currentKingdom = king;
+
+              for (hexId in currentKingdom.hexes) {
+                hex = currentKingdom.hexes[hexId];
+                if (
+                  hex.holding != null &&
+                  hex.holding.constructor.name == "Man" &&
+                  hex.moved == false
+                ) {
+                  if (hand.pickup(hex.holding, hex)) {
+                    hex.holding = null;
+                    updateTargets();
+                    if (targets.length > 0) {
+                      teamCanMove = true;
+                      //select a target location at random
+                      targetHex = takeOne(targets);
+                      //put what we picked up onto the targetHex
+                      claim(targetHex, c);
+                      break;
+                    }
+                  }
+                }
+              }
+
+              //todo: don't buy peasant just cause we can!!
+              //only buy if... you can sustain...
+
+              while (currentKingdom.money >= 10 && tryBuyPeasant()) {
+                //'try buy peasant' calls 'update Targets' itself...;
+                if (targets.length > 0) {
+                  teamCanMove = true;
+                  //select a target location at random
+                  targetHex = takeOne(targets);
+                  //put what we bought on the targetHex
+                  claim(targetHex, c);
+                  break;
+                }
+              }
+              hand.drop();
             }
+          }
         }
-    }
-}
-		
-function setMoved(c, t, value) {
-    var kingdomID, king, h, hex;
-	for (kingdomID in kingdoms.items) {	
-	    king = kingdoms.items[kingdomID];			   
-        if (king.team() == t) {
-			for (h in king.hexes) {
-				hex = king.hexes[h];
-				if (hex.holding != null) {
-					hex.holding.moved = value;
-				}
-				hex.draw(c);        		  
-			}
-		}
-	}
-}
+      }
 
-function calculateProfit(t) {
-    //calculate profit/loss for each kingdom that belongs to a given team
-    var kingdomID, king, h, profit, cost;
-    for (kingdomID in kingdoms.items) {
-	    king = kingdoms.items[kingdomID];			   
-        if (king.team() == t) {
-		    profit = king.hexes.length; //an income of 1 for each hex in kingdom
-			//todo: reduce profit by the number of tree tiles
-			cost = 0;
-			  //todo: maybe holding a building? or a tombstone, or a tree.
-			for(h = 0; h < king.hexes.length; h = h + 1) {
-			  if (king.hexes[h].holding != null && king.hexes[h].holding.constructor.name == "Man") {
-			    cost = cost + king.hexes[h].holding.cost(); 
-			  }
-			}
-			
-			//turn all tombstones into trees
-			//for(h = 0; h < king.hexes.length; h = h + 1) {
-			//  if (king.hexes[h].holding != null && king.hexes[h].holding.constructor.name == "Tombstone") {
-			//    king.hexes[h].holding = new Tree();
-			//  }
-			//}
-			
-			
-			profit = profit - cost;
-			king.profit = profit;
-			king.money = king.money + profit;
-			//not enough money to feed everyone? replace them with tombstones.
-			if (king.money < 0) {
-			  for(h = 0; h < king.hexes.length; h = h + 1) {
-			  if (king.hexes[h].holding != null && king.hexes[h].holding.constructor.name == "Man") {
-			    king.hexes[h].holding = new Tombstone();
-			  }
-			}
-			
-			}
-		}
-    }
-}
+      function setMoved(c, t, value) {
+        var kingdomID, king, h, hex;
+        for (kingdomID in kingdoms.items) {
+          king = kingdoms.items[kingdomID];
+          if (king.team() == t) {
+            for (h in king.hexes) {
+              hex = king.hexes[h];
+              if (hex.holding != null) {
+                hex.holding.moved = value;
+              }
+              hex.draw(c);
+            }
+          }
+        }
+      }
 
-function newBoard() {
-    var x, y, team, newHexes;
-    newHexes = [];
-    for (x = 0; x < MAX_X; x = x + 1) {
-        newHexes[x] = [];
-        for (y = 0; y < MAX_Y; y = y + 1) {
-            if (hexes[x][y]['team'] == currentTeam) {
-                team = currentTeam;
+      function calculateProfit(t) {
+        //calculate profit/loss for each kingdom that belongs to a given team
+        var kingdomID, king, h, profit, cost;
+        for (kingdomID in kingdoms.items) {
+          king = kingdoms.items[kingdomID];
+          if (king.team() == t) {
+            profit = king.hexes.length; //an income of 1 for each hex in kingdom
+            //todo: reduce profit by the number of tree tiles
+            cost = 0;
+            //todo: maybe holding a building? or a tombstone, or a tree.
+            for (h = 0; h < king.hexes.length; h = h + 1) {
+              if (
+                king.hexes[h].holding != null &&
+                king.hexes[h].holding.constructor.name == "Man"
+              ) {
+                cost = cost + king.hexes[h].holding.cost();
+              }
+            }
+
+            //turn all tombstones into trees
+            //for(h = 0; h < king.hexes.length; h = h + 1) {
+            //  if (king.hexes[h].holding != null && king.hexes[h].holding.constructor.name == "Tombstone") {
+            //    king.hexes[h].holding = new Tree();
+            //  }
+            //}
+
+            profit = profit - cost;
+            king.profit = profit;
+            king.money = king.money + profit;
+            //not enough money to feed everyone? replace them with tombstones.
+            if (king.money < 0) {
+              for (h = 0; h < king.hexes.length; h = h + 1) {
+                if (
+                  king.hexes[h].holding != null &&
+                  king.hexes[h].holding.constructor.name == "Man"
+                ) {
+                  king.hexes[h].holding = new Tombstone();
+                }
+              }
+            }
+          }
+        }
+      }
+
+      function newBoard() {
+        var x, y, team, newHexes;
+        newHexes = [];
+        for (x = 0; x < MAX_X; x = x + 1) {
+          newHexes[x] = [];
+          for (y = 0; y < MAX_Y; y = y + 1) {
+            if (hexes[x][y]["team"] == currentTeam) {
+              team = currentTeam;
             } else {
-                team = pickIndex(turfColors.length);
+              team = pickIndex(turfColors.length);
             }
             newHexes[x][y] = new Hex(team, x, y);
-            if (x < 2 || y < 2 || (x + 3 > MAX_X) || (y + 3 > MAX_Y)) {
-                newHexes[x][y] = {}; //delete the hex.
+            if (x < 2 || y < 2 || x + 3 > MAX_X || y + 3 > MAX_Y) {
+              newHexes[x][y] = {}; //delete the hex.
             }
+          }
         }
-    }
-    return newHexes;
-}
+        return newHexes;
+      }
 
-function getNeighbors(x, y) {
-    if (y == undefined) {
-        //this is a mistake i make too often -- thinking i can pass a point to this function
-        alert('getNeighbors requires an x and a y');
-    }
-    var shift, neighbors;
-    shift = x % 2; //funky hex layout magic
-    neighbors = [];
-    neighbors[0] = getHex(x, y - 1);
-    neighbors[1] = getHex(x + 1, y - 1 + shift);
-    neighbors[2] = getHex(x + 1, y + shift);
-    neighbors[3] = getHex(x, y + 1);
-    neighbors[4] = getHex(x - 1, y + shift);
-    neighbors[5] = getHex(x - 1, y - 1 + shift);
-    return neighbors;
-}
+      function getNeighbors(x, y) {
+        if (y == undefined) {
+          //this is a mistake i make too often -- thinking i can pass a point to this function
+          alert("getNeighbors requires an x and a y");
+        }
+        var shift, neighbors;
+        shift = x % 2; //funky hex layout magic
+        neighbors = [];
+        neighbors[0] = getHex(x, y - 1);
+        neighbors[1] = getHex(x + 1, y - 1 + shift);
+        neighbors[2] = getHex(x + 1, y + shift);
+        neighbors[3] = getHex(x, y + 1);
+        neighbors[4] = getHex(x - 1, y + shift);
+        neighbors[5] = getHex(x - 1, y - 1 + shift);
+        return neighbors;
+      }
 
-function getHex(x, y) {
-    if (x >= 0 && y >= 0 && hexes[x] != undefined) {
-        return hexes[x][y];
-    }
-    return null;
-}
+      function getHex(x, y) {
+        if (x >= 0 && y >= 0 && hexes[x] != undefined) {
+          return hexes[x][y];
+        }
+        return null;
+      }
     </script>
-    </head>
-    <body onload='init()'>
-        <canvas id="a" width="550" height="475">
-        </canvas>
-		<span id='teamColors' class='info'>
-		</span>
-        <div id='holding' class='info'>
-            holding
-        </div>
-        <div id='kingdom' class='info'>
-            kingdom
-        </div>
-        <input type='button' onclick='javascript:endTurn();' value='End Turn' />
-		<input type='button' onclick='javascript:emulsify();' value='melt' />
-		
-        <span id='message' class='info'>
-        </span>
-    </body>
+  </head>
+  <body onload="init()">
+    <canvas id="a" width="550" height="475"> </canvas>
+    <span id="teamColors" class="info"> </span>
+    <div id="holding" class="info">holding</div>
+    <div id="kingdom" class="info">kingdom</div>
+    <input type="button" onclick="javascript:endTurn();" value="End Turn" />
+    <input type="button" onclick="javascript:emulsify();" value="melt" />
+
+    <span id="message" class="info"> </span>
+  </body>
 </html>
